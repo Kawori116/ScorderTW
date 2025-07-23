@@ -62,3 +62,6 @@ dump.rdb
 # Claude Code
 CLAUDE.md
 .claude/
+
+# Development settings (never commit)
+development.py

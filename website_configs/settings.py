@@ -12,10 +12,6 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import os
-import pymysql
-
-# Use PyMySQL as MySQL adapter
-pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -158,11 +154,10 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'orderingweb_sample',
         'USER': 'root',
-        'PASSWORD': '',
+        'PASSWORD': 'mysql789456123',
         'HOST': 'localhost',
         'PORT': '',
         "OPTIONS": {
-            'unix_socket': '/Applications/XAMPP/xamppfiles/var/mysql/mysql.sock',
             "charset": "utf8mb4",
         },
     }

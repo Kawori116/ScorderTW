@@ -1,0 +1,24 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Ordering System</title>
+    <link href="/static/assets/css/loading.css" rel="stylesheet" type="text/css" />
+    <link href="/static/assets/css/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <section>
+        <div class="container">
+            <div>
+                <h4 class="error-text">
+                    Your account has been locked. Please attempt to log in again within {{ axes_cooloff_time }} seconds.
+                </h4>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>

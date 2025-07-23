@@ -1,0 +1,135 @@
+.input-group select {
+    border: solid 1px var(--light-grey);
+    color: var(--accent);
+}
+
+.title-header {
+    align-items: flex-start;
+}
+
+.title-header .order-info-container {
+    padding: 0.7em;
+    background-color: var(--accent);
+    color: var(--white);
+    border-radius: var(--border-radius);
+    width: 100%;
+    margin-bottom: 0.5em;
+    display: flex;
+    flex-direction: column;
+}
+
+.title-header .order-info-container .order-info-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title-header .order-info-container .order-info-contact {
+    border-top: solid 2px #fff;
+    padding-top: 1em;
+    margin-top: 1em;
+}
+
+.title-header .order-info-container .order-info-no {
+    display: flex;
+    align-items: center;
+}
+
+.title-header .order-info-container .order-info {
+    padding: .5em 0;
+}
+
+.title-header .order-info-container .order-info_table-no {
+    margin-bottom: .5em;
+}
+
+.custom {
+    cursor: pointer;
+}
+
+/* Action Column */
+.action-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 0;
+}
+
+.action-container .btn-wrap,
+.btn-container .btn-wrap {
+    padding: 0;
+    justify-content: center;
+}
+
+.btn-wrap button {
+    border-radius: var(--border-radius);
+}
+
+.action-container .btn-wrap button:hover {
+    background-color: var(--light-grey);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    box-shadow: none;
+}
+
+.action-container .btn-wrap button:disabled {
+    background-color: var(--accent);
+    opacity: 30%;
+    color: var(--white);
+}
+
+.btn-container {
+    display: flex;
+    gap: 1em;
+    justify-content: flex-end;
+}
+
+.btn-container .btn-wrap button {
+    background-color: var(--white) !important;
+    color: var(--accent) !important;
+    box-shadow: none;
+}
+
+.btn-container .btn-wrap button:hover {
+    background-color: var(--accent) !important;
+    color: var(--white) !important;
+}
+
+.action-container .delete-btn {
+    background-color: var(--red);
+}
+
+.confirm-order-btn {
+    border: solid 1px var(--accent) !important;
+}
+
+.customization-details {
+    border-radius: 5px !important;
+    text-align: left !important;
+    background-color: azure;
+}
+
+.customization-details ul {
+    flex-direction: column;
+}
+
+.customization-details strong {
+    color: var(--accent);
+}
+
+/* Total Container */
+.order-total-container {
+    padding: 0.7em;
+    background-color: var(--white);
+    color: var(--accent);
+    border-radius: var(--border-radius);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .2);
+}
+
+.order-total {
+    padding: .5em 0;
+}

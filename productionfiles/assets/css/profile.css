@@ -1,0 +1,72 @@
+* {
+    /* border: solid 1px black; */
+}
+
+body {
+    background-color: rgb(240, 240, 240, .5);
+}
+
+.row{
+    display: flex;
+    width: 100%;
+    margin-bottom: 3em;
+}
+
+.label, .input-info{
+    display: flex;
+    align-items: start;
+}
+
+.label{
+    width: calc(100% - 70%);
+}
+.label > label{
+    margin-left: 0.5em;
+    font-weight: 500;
+}
+
+input[type="text"], textarea {
+    border: 2px solid #e6e6e6;
+    padding: 0.5em 1em;
+    width: 25em;
+    border-radius: 5px;
+    outline: none;
+    line-height: 1.5;
+    background-color: white;
+}
+
+textarea{
+    height: 15em;
+    resize: none;
+}
+
+::placeholder {
+    color: rgb(0, 128, 128, .3);
+}
+
+.btn-wrap{
+    display: flex;
+    justify-content: end;
+}
+
+.save-btn{
+    background-color: teal;
+    color: white;
+    padding: 1em 3em;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+@media screen and (max-width: 768px) {
+
+    input[type="text"], textarea {
+        width: 18em;
+    }
+    
+    textarea{
+        height: 10em;
+    }
+    
+}

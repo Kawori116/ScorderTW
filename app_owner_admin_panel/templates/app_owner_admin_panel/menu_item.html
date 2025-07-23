@@ -1,0 +1,94 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    {%include 'head_top.html'%}
+    <link href="/static/assets/css/dish.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    {%include 'navbar_owner.html'%}
+    <section>
+        <div class="container">
+            <div class="row justify-content-md-center">
+                <div class="col-md-12 col-xs-12">
+                    <div class="menu-item-header">
+                        <h3 id="title-text">Menu Item</h3>
+                        <a href="{% url 'add_dish_page'%}" class="btn add-btn">Add +</a>
+                    </div>
+                    <hr class="mt-0"/>
+                    <table id="menu-item-table" class="display">
+                        <thead>
+                            <tr>
+                                <th>Menu Items Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category in menu_categories %}
+                                {% for dish in category.dish_set.all %}
+                                <tr>
+                                    <td class="menu-item-list">
+                                        <div class="menu-item-name">
+                                            <p>{{ dish.name }}</p>
+                                            {% if dish.customization_available %}
+                                            <div class="custom-icon">
+                                                custom
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="action-wrap">
+                                            <a href="{% url 'edit_dish' dish.pk %}" class="edit-btn">
+                                                <div class="icon-wrap">
+                                                    <i class="fas fa-pen"></i>
+                                                </div>
+                                            </a>
+                                            <form id="delete-menu-item-{{ dish.pk }}" action="{% url 'delete_dish' dish.pk %}" method="POST" style="display: inline;">
+                                                {% csrf_token %}
+                                                <button type="button" class="delete-btn" onclick="confirmDelete('{{ dish.pk }}', '{{ dish.name }}')">
+                                                    <div class="icon-wrap">
+                                                        <i class="fas fa-trash"></i>
+                                                    </div>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+    {%include 'footer.html'%}
+
+    <script>
+
+        $(document).ready(function () {
+            initializeDataTable("#menu-item-table", []);
+        });
+        
+        function confirmDelete(categoryId, categoryName) {
+            Swal.fire({
+                title: `Are you sure to delete ${categoryName}?`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "var(--red)",
+                cancelButtonColor: "var(--light-grey)",
+                confirmButtonText: "Delete",
+                cancelButtonText: "Cancel",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $(`#delete-menu-item-${categoryId}`).submit();
+                 
+                }
+            });
+        }
+    </script>
+    
+</body>
+</html>

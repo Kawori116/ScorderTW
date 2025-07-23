@@ -1,0 +1,28 @@
+<!-- app_customer_interface/templates/app_customer_interface/order_error.html -->
+
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    {%include 'chead_top.html'%}
+</head>
+
+<body>
+    {%include 'loading.html'%}
+    <section>
+        <div class="container">
+            <div>
+                <h4 class="error-text">
+                    Invalid Order.
+                </h4>
+                <a href="{% url 'index' encrypted_table_number=encrypted_table_number %}">
+                    <button class="bg-btn keep-btn "><p>Return to Homepage</p></button>
+                </a>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>

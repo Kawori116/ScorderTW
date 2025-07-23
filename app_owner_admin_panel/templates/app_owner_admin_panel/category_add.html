@@ -1,0 +1,103 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    {%include 'head_top.html'%}
+    <link href="/static/assets/css/category.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    {%include 'navbar_owner.html'%}
+    <section>
+        <div class="container">
+            <div class="row justify-content-md-center">
+                <div class="col-md-12 col-xs-12">
+                    <div class="category-subheader">
+                        <a href="{% url 'category' %}">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <h3 id="title-text">Category</h3>
+                        </a>
+                        <p>Add</p>
+                    </div>
+                    <hr class="mt-0"/>
+                    <form>
+                        {% csrf_token %}
+                        <div class="input-wrapper">
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-3">
+                                    <label for="name" class="form-label">Category Name</label>
+                                </div>
+                                <div class="col-12 col-md-9">
+                                    <div class="input-group">
+                                        <input type="text" id="name" name="name" class="form-control" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-3">
+                                    <label for="description" class="form-label">Category Description</label>
+                                </div>
+                                <div class="col-12 col-md-9">
+                                    <div class="input-group">
+                                        <textarea id="description" name="description" class="form-control" rows="4" required></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="btn-wrap">
+                            <button type="button" class="btn save-btn" id="submit-category">Add</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    {%include 'footer.html'%}
+    
+    <script>
+
+        $(document).ready(function() {
+            $('#submit-category').click(function(e) {
+                e.preventDefault();
+
+                var profileInfo = {
+                    'name': $('#name').val(),
+                    'description': $('#description').val(),
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                };
+                
+                const csrftoken = getCookie('csrftoken');
+                $.ajax({
+                    url: '{% url "add_category" %}',
+                    method: 'POST',
+                    data: profileInfo,
+                    dataType: 'json',
+                    headers: { 'X-CSRFToken': csrftoken },
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                    },
+                    success: function(response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'New Category Added',
+                            showConfirmButton: false,
+                            timer: 2000,
+                        }).then((result) => {
+                            window.location.href = "{% url 'category' %}";
+                        });
+                    },
+                    error: function(response) {
+                        Swal.fire({
+                            title: "Error!",
+                            text: "Error adding category!",
+                            icon: "error",
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+/* Invoice Greeting */
+.invoice_greeting {
+    text-align: center;
+    letter-spacing: 1px;
+    margin: 2.5em 0;
+    color: teal;
+}
+
+
+/* Invoice Header */
+.invoice_header {
+    letter-spacing: 1px;
+    padding: 0 1em;
+}
+
+.invoice_order-no {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5em;
+    color: teal;
+}
+
+.invoice_table-no {
+    color: #777777;
+    margin: 0.5em 0;
+}
+
+.invoice_detail {
+    border-top: solid 2px #e6e6e6;
+    border-bottom: solid 2px #e6e6e6;
+}
+
+/* Invoice List */
+.invoice_detail-list {
+    flex-direction: column;
+    padding: 1em;
+}
+
+.invoice_detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75em 0;
+}
+
+.ordered_item-info {
+    color: #777777;
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+
+.ordered_item-name {
+    color: teal;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.3em;
+}
+
+.ordered_item-customization-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.invoice_detail-contact { 
+    color: #777777;
+    padding-bottom: 2em;
+}
+
+.invoice_detail-contact .subtitle{
+    color: teal;
+    margin-bottom: .5em;
+}
+
+.ordered_item-total {
+    color: teal;
+    letter-spacing: 1px;
+    line-height: 1.5;
+    font-size: 1rem;
+}
+
+.invoice_detail-total {
+    display: flex;
+    justify-content: space-between;
+    color: teal;
+    padding: 1em 0;
+    letter-spacing: 1px;
+}
+
+/* Done Button */
+.invoice-done-btn {
+    background-color: teal;
+    margin: 1em 0;
+}
+
+
+@media screen and (max-width:376px) {
+
+    .invoice_order-no {
+        font-size: 1.3rem;
+        margin-bottom: 0.4em;
+    }
+
+    .invoice_table-no {
+        margin: 0.4em 0;
+    }
+
+    .ordered_item-info {
+        line-height: 1.4;
+        font-size: 0.8rem;
+    }
+
+    .ordered_item-name {
+        font-size: 0.9rem;
+    }
+
+    .ordered_item-total,
+    .invoice_detail-total {
+        line-height: 1.4;
+        font-size: 0.9rem;
+    }
+}

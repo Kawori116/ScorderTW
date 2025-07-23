@@ -1,0 +1,146 @@
+/* Hero Section */
+.back {
+    color: white;
+    position: absolute;
+    margin: .8em;
+    padding: .4em .7em;
+    z-index: 10;
+    transition: ease .2s;
+    text-align: center;
+    background-color: teal;
+    border-radius: 5px;
+    line-height: 1em;
+    font-size: 1.5em;
+    text-decoration: none !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .2);
+}
+
+.back:hover {
+    color: teal;
+    background-color: white;
+}
+
+.dish-img {
+    opacity: 1;
+}
+
+.dish-img-wrap {
+    overflow: hidden;
+}
+
+.dish-img-wrap img {
+    transform: scale(1);
+}
+
+/* Dish Information */
+.menu_dish-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0;
+}
+
+.menu_dish-heading {
+    text-align: start;
+}
+
+.menu_dish-price {
+    text-align: center;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    background-color: teal;
+    color: white;
+    letter-spacing: 1px;
+}
+
+.menu_dish-description {
+    color: #777777;
+    text-align: justify;
+    white-space: break-spaces;
+}
+
+/* Customization Fieldset */
+.selection-grp {
+    display: flex;
+    align-items: center;
+}
+
+.selection-info {
+    font-size: .7em;
+    color: #777777;
+}
+
+.option-name {
+    margin-left: 1em;
+}
+
+/* Quantity Counter */
+.quantity-counter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 1.5rem 0;
+}
+
+.quantity-counter-btn {
+    border-radius: 50%;
+    padding: 14px;
+    min-width: 62px;
+    font-size: 1.5rem;
+    text-align: center;
+    background-color: #e6e6e6;
+    box-shadow: none;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.quantity-counter-btn:hover {
+    background-color: teal;
+    color: white;
+}
+
+.quantity-counter-number {
+    text-align: center;
+    border: none;
+    outline: none;
+    width: 3em;
+    font-size: 1.75em;
+}
+
+/* Add Cart Button */
+.add-cart-wrapper {
+    padding: 1rem 0;
+    position: sticky;
+    bottom: 0px;
+}
+
+.add-cart-btn {
+    background-color: teal;
+}
+
+@media screen and (max-width: 768px) {
+    .back {
+        margin: .4em;
+        padding: .2em .5em;
+    }
+
+    .diyonigiri {
+        height: 15em;
+    }
+
+    .menu_dish-price {
+        padding: 0.3rem 0.9rem;
+    }
+
+    .quantity-counter-btn {
+        padding: 10px;
+        min-width: 58px;
+    }
+
+    .quantity-counter-number {
+        width: 2em;
+        font-size: 1.5rem;
+    }
+
+}

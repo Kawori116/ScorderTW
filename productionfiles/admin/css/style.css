@@ -1,0 +1,328 @@
+*,
+*::before,
+*::after {
+    /* border: solid 1px black !important; */
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body,
+html {
+    width: 100%;
+    margin: 0;
+    min-height: 100%;
+}
+
+h1 {
+    font-size: 3rem;
+}
+
+h2 {
+    font-size: 2rem;
+}
+
+h3 {
+    font-size: 1.5rem;
+}
+
+h4 {
+    font-size: 1.1rem;
+}
+
+p {
+    line-height: 1.5;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    overflow-wrap: break-word;
+}
+
+span {
+    margin-right: 0.5em;
+}
+
+ul {
+    list-style-type: none;
+    display: flex;
+    width: 100%;
+}
+
+a {
+    text-decoration: none;
+    line-height: 1.5;
+}
+
+img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.2);
+}
+
+button {
+    border-color: transparent;
+}
+
+/* Global Button */
+.bg-btn {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .2);
+    font-size: 1.25rem;
+    color: white;
+}
+
+form>* {
+    margin-top: 1rem;
+}
+
+fieldset {
+    padding: 1em;
+    border: solid 2px #e6e6e6;
+}
+
+legend {
+    font-size: 1.5rem;
+    padding: 0 10px;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+input[type="checkbox"] {
+    width: 1.5em;
+    height: 1.5em;
+    margin-right: 0.65em;
+    accent-color: teal;
+}
+
+label {
+    cursor: pointer;
+}
+
+select{
+    min-width: 6em;
+    padding: 0.5em 1.5em;
+    background-color: white;
+    border: solid 2px #e6e6e6;
+    color: black;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+select:focus{
+    outline: none;
+}
+
+th {
+    font-weight: 700;
+    font-size: 1rem;
+    color: teal;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 1em;
+}
+
+th:first-child,
+td:first-child {
+    border-radius: 5px 0 0 5px;
+    /* text-align: left; */
+}
+
+
+th:nth-child(2),
+td:nth-child(2) {
+    /* text-align: left; */
+}
+
+th:last-child,
+td:last-child {
+    border-radius: 0 5px 5px 0;
+    text-align: center;
+}
+
+table {
+    border-spacing: 0;
+    width: 100%;
+    border-spacing: 0 0.4em;
+}
+
+tr {
+    background-color: white;
+    transition: .3s ease;
+}
+
+tr:hover {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .2);
+}
+
+tr:hover>td:first-child {
+    border-left: solid 5px teal;
+    padding-left: calc(1em - 5px);
+}
+
+section {
+    width: 90%;
+    margin: 0 auto;
+    max-width: 700px;
+    min-height: 100vh;
+}
+
+section hr {
+    margin: 1em 0;
+    border: solid 1px #e6e6e6;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Title */
+.title {
+    margin-top: 1em;
+    margin-left: 0.5em;
+    color: teal;
+}
+
+/* order status */
+
+.order-status {
+    padding: 0.5em 0.3em;
+    border-radius: 30px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.8em;
+}
+
+.status-completed {
+    background-color: rgb(207, 253, 225, .8);
+    color: rgb(104, 185, 132);
+}
+
+.status-placed {
+    background-color: rgb(255, 225, 93, .5);
+    color: rgb(244, 157, 26);
+}
+
+.status-canceled {
+    background-color: rgb(252, 174, 174, .5);
+    color: rgb(255, 102, 102);
+}
+
+.status-processing {
+    background-color: rgb(229, 207, 247, .5);
+    color: rgb(157, 118, 193);
+}
+
+.status-confirmed {
+    background-color: rgb(224, 244, 255, .8);
+    color: rgb(57, 167, 255);
+}
+
+/* Data Table */
+.paginate_button{
+    padding: .2em .5em;
+    margin: .2em;
+    background-color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #777777;
+}
+
+.paginate_button:hover{
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .2);
+}
+
+.paginate_button.current{
+    background-color: teal;
+}
+
+.paginate_button.current a{
+    color: white;
+}
+
+/* Footer */
+footer {
+    background-color: teal;
+    color: white;
+    padding: 3em;
+    margin-top: 3em;
+}
+
+.footer-content {
+    text-align: center;
+}
+
+.error-text{
+    text-align: center;
+    margin: 1em 0;
+}
+
+.keep-btn {
+    background-color: #777777;
+    margin-bottom: 1em;
+}
+
+@media screen and (max-width: 768px) {
+
+    section {
+        min-width: 350px;
+    }
+
+    footer {
+        padding: 2em;
+        margin-top: 2em;
+    }
+}
+
+@media screen and (max-width:376px) {
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    h3 {
+        font-size: 1.3rem;
+    }
+
+    h4 {
+        font-size: 1rem;
+    }
+
+    p {
+        line-height: 1.3;
+    }
+
+    legend {
+        font-size: 1.3rem;
+    }
+
+    section {
+        min-width: 250px;
+    }
+
+    footer {
+        padding: 2em;
+        margin-top: 2em;
+    }
+
+}

@@ -1,0 +1,106 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    {%include 'head_top.html'%}
+    <link href="/static/assets/css/loading.css" rel="stylesheet" type="text/css" />
+    <link href="/static/assets/css/system_management.css?v=20240919" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    {%include 'navbar_staff.html'%}
+    <section>
+        <div class="container">
+            <div class="row justify-content-md-center">
+                <div class="col-md-12 col-xs-12">
+                    <div class="tile-header">
+                        <h3 id="title-text">System Management</h3>
+                    </div>
+                    <hr />
+                    <div class="system-card">
+                        <div class="col">
+                            <form id="management-mode-form" method="post" action="{% url 'update_management_mode' %}">
+                                {% csrf_token %}
+                                <div>
+                                    <h3>Management Mode</h3>
+                                    <div class="management-mode">Current Mode: <span>{% if automatic_management %}automatic{% else %}Manual{% endif%}</span></div>
+                                </div>
+                                <div class="radio-container">
+                                    <div class="radio-wrap">
+                                        <label for="automatic-mode" class="{% if automatic_management %}active{% endif %}">Automatic</label>
+                                        <input type="radio" id="automatic-mode" name="management_mode" value="automatic" {% if automatic_management %}checked{% endif %}/>
+                                    </div>
+                                    <div class="radio-wrap">
+                                        <label for="manual-mode" class="{% if not automatic_management %}active{% endif %}">Manual</label>
+                                        <input type="radio" id="manual-mode" name="management_mode" value="manual" {% if not automatic_management %}checked{% endif %}/>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col" class="status-and-form-container">
+                            <h3>System Mode</h3>
+                            <div class="system-status">Current Mode:
+                                {% if system_open %}
+                                <span>Open</span>
+                                {% else %}
+                                <span>Close</span>
+                                {% endif %}
+                            </div>
+                            {% if not automatic_management %}
+                                {% if system_open %}
+                                <form method="post" action="{% url 'close_system' %}">
+                                    <div class="btn-wrap">
+                                        {% csrf_token %}
+                                        <button class="close-btn" type="submit">Close</button>
+                                    </div>
+                                </form>
+                                {% else %}
+                                <form method="post" action="{% url 'open_system' %}">
+                                    <div class="btn-wrap">
+                                        {% csrf_token %}
+                                        <button class="close-btn" type="submit">Open</button>
+                                    </div>
+                                </form>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {%include 'footer.html'%}
+
+    <script>
+        $(document).ready(function () {
+
+            // Event listener for radio button changes
+            $('input[name="management_mode"]').change(function () {
+            
+                // Submit the form
+                $('#management-mode-form').submit();
+
+                $(this).closest('.radio-wrap label').addClass("active"); // Fixed the selector for adding class
+            });
+                        
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,385 @@
+<!-- app_customer_interface/templates/app_customer_interface/item_details.html -->
+
+{% load static %}
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    {%include 'chead_top.html'%}
+    <link href="/static/assets/css/tool/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/static/assets/css/item_details.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    {%include 'loading.html'%}
+    <section>
+        <header>
+            <div class="container">
+                <a href="{% url 'index' encrypted_table_number=encrypted_table_number %}" class="back">❮</a>
+                <div class="dish-img">
+                    <div class="dish-img-wrap">
+                        <img src="{% if dish.image_16x9 %}{{ dish.image_16x9.url }}{% else %}/static/assets/images/no-image-16x9.png{% endif %}" alt="{{ dish.name }} Image" loading="lazy">
+                    </div>
+                </div>
+            </div>
+        </header>
+        <main>
+            <div class="container">
+                <div class="menu_dish-info">
+                    <h2 class="menu_dish-name">{{ dish.name }}</h2>
+                    <p class="menu_dish-price"> ${{ dish.price }}</p>
+                </div>
+                <p class="menu_dish-description">{{ dish.description }}</p>
+            </div>
+            <hr>
+            {% if dish.customization_available %}
+                <form method="post" action="{% url 'item_details' encrypted_table_number=encrypted_table_number dish_id=dish.dish_id %}" onsubmit="return validateForm(this)">
+                    {% csrf_token %}
+                        <!-- Display customization options for each category -->
+                        {% for category in customization_categories %}
+                            <fieldset data-category-id="{{ category.id }}" data-max-selections="{{ category.max_selection }}">
+                                <legend >
+                                    {{ category.name }}
+                                    <span class="selection-info">
+                                        {% if category.max_selection > 0 %}
+                                            Choose {{ category.max_selection }} out of {{ category.options|length }}
+                                        {% endif %}
+                                    </span>
+                                </legend>
+                                <div class="category-options">
+                                    
+                                    <!-- Check if category.id is in the specified list -->
+                                    {% if category.id == 44 %}
+                                        <!-- Render dropdown for these categories -->
+                                        {% for option in category.options %}
+                                            <label class="selection-grp">
+                                                <select name="form-control category_{{ category.id }}_option_{{ option.id }}">
+                                                    {% for i in category.max_selection|make_range %}
+                                                        <option value="{{ i }}">{{ i }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <div class="option-name">
+                                                    {{ option.name }}
+                                                    {% if option.price > 0 %}
+                                                        (+${{ option.price }})
+                                                    {% endif %}
+                                                </div>
+                                            </label><br />
+                                        {% endfor %}
+                                    {% else %}
+                                        <!-- Render checkbox for these categories -->
+                                        {% for option in category.options %}
+                                        <label class="selection-grp">
+                                            <input type="checkbox" name="category_{{ category.id }}_options" value="{{ option.id }}">
+                                            <!-- <input type="checkbox" name="options" value="{{ option.id }}"> -->
+                                            <div class="option-name">
+                                                {{ option.name }}
+                                                {% if option.price > 0 %}
+                                                    (+${{ option.price }})
+                                                {% endif %}
+                                            </div>
+                                        </label><br />
+                                        {% endfor %}
+                                    {% endif%}
+                                </div>
+                                <div class="notification"></div>
+                            </fieldset>
+                        {% endfor %}
+                    <div class="quantity-counter">
+                        <span class="minus-button quantity-counter-btn" onclick="decreaseQuantity()">－</span>
+                        <input type="number" class="quantity-counter-number"  name="quantity" id="quantity" min="1" max="15" value="1" readonly>
+                        <span class="plus-button quantity-counter-btn"  onclick="increaseQuantity()">＋</span>
+                    </div>
+                    <div class="add-cart-wrapper">
+                        <a href="">
+                            <button class="bg-btn add-cart-btn" type="submit">Add to Cart</button>
+                        </a>
+                    </div>
+                </form>
+            {% else %}
+                <form method="post" action="{% url 'item_details' encrypted_table_number=encrypted_table_number dish_id=dish.dish_id %}">
+                    {% csrf_token %}
+                    <div class="quantity-counter">
+                        <span class="minus-button quantity-counter-btn" onclick="decreaseQuantity()">－</span>
+                        <input type="number" class="quantity-counter-number"  name="quantity" id="quantity" min="1" max="15" value="1" readonly>
+                        <span class="plus-button quantity-counter-btn"  onclick="increaseQuantity()">＋</span>
+                    </div>
+                    <div class="add-cart-wrapper">
+                        <a href="">
+                            <button class="bg-btn add-cart-btn" type="submit">Add to Cart</button>
+                        </a>
+                    </div>
+                </form>
+            {% endif %}
+            
+        </main>
+    </section>
+
+
+    <script>
+        $(document).ready(function() {
+
+            var categoryMaxSelections = {};
+
+            // Initialize categoryMaxSelections and add change event listener to each select input
+            $('fieldset[data-category-id]').each(function() {
+                var categoryId = $(this).data('category-id');
+                var maxSelections = $(this).data('max-selections');
+                categoryMaxSelections[categoryId] = maxSelections;
+                
+                // $(this).find('select').change(function() {
+                //     enforceDropdownLimit(this, categoryId, maxSelections);
+                // });
+
+                $(this).on('change', 'select, input[type="checkbox"]', function(event) {
+                    // Determine the type of the changed element
+                    if ($(event.target).is('select')) {
+                        enforceDropdownLimit(event.target, categoryId, maxSelections);
+                    } else if ($(event.target).is('input[type="checkbox"]')) {
+                        enforceCheckboxLimit(event.target, categoryId, maxSelections);
+                    }
+                });
+
+            });
+        });
+        function enforceDropdownLimit(selectElement, categoryId, maxSelections) {
+            var totalSelected = 0;
+            $(selectElement).closest('fieldset').find('select').each(function() {
+                totalSelected += parseInt($(this).val());
+            });
+
+            if (totalSelected > maxSelections && maxSelections !== 0) {
+                $(selectElement).val('0'); // Reset the last selected dropdown
+                var notificationDiv = $(selectElement).closest('fieldset').find('.notification');
+                notificationDiv.text(`You may select up to ${maxSelections} options only.`).show().delay(5000).fadeOut();
+            }
+        }
+
+        function enforceCheckboxLimit(checkboxElement, categoryId, maxSelections) {
+            var checkedCheckboxes = $(checkboxElement).closest('fieldset').find('input[type="checkbox"]:checked');
+            if (checkedCheckboxes.length > maxSelections && maxSelections !== 0) {
+                $(checkboxElement).prop('checked', false);
+                var notificationDiv = $(checkboxElement).closest('fieldset').find('.notification');
+                notificationDiv.text(`You may select up to ${maxSelections} options only.`).show().delay(5000).fadeOut();
+            }
+        }
+
+        // Standalone validateForm function
+        function validateForm(form) {
+            event.preventDefault(); // Prevent default form submission
+
+            var isValid = true;
+            var selectedOptionsSummary = "";
+
+            // $('fieldset[data-category-id]').each(function() {
+            //     var categoryId = $(this).data('category-id');
+            //     var maxSelections = $(this).data('max-selections');
+            //     var totalSelected = 0;
+            //     var categoryOptions = [];
+
+            //     $(this).find('select').each(function() {
+            //         var selectedValue = parseInt($(this).val());
+            //         totalSelected += selectedValue;
+            //         if (selectedValue > 0) {
+            //             categoryOptions.push($(this).next().text() + 'x ' + selectedValue);
+            //         }
+            //     });
+                
+            //     if ((totalSelected < 1 && maxSelections !== 0) || totalSelected > maxSelections) {
+            //         $(this).find('.notification').text('您未做任何選擇。').show().delay(5000).fadeOut();
+            //         isValid = false;
+            //     } else if (categoryOptions.length > 0) {
+            //         selectedOptionsSummary += `<p>${$(this).find('legend').clone().find('.selection-info').remove().end().text().trim()}： ${categoryOptions.join(', ')}</p>`;
+            //     }
+            // });
+
+            // $('fieldset[data-category-id]').each(function() {
+            //     var categoryId = $(this).data('category-id');
+            //     var maxSelections = $(this).data('max-selections');
+            //     var checkedCheckboxes = $(this).find('input[type="checkbox"]:checked');
+            //     var categoryOptions = [];
+
+            //     if ((checkedCheckboxes.length < 1 && maxSelections !== 0) || checkedCheckboxes.length > maxSelections) {
+            //         $(this).find('.notification').text('您未做任何選擇。').show().delay(5000).fadeOut();
+            //         isValid = false;
+            //     } else {
+            //         checkedCheckboxes.each(function() {
+            //             var optionName = $(this).next('.option-name').text();
+            //             categoryOptions.push(optionName);
+            //         });
+            //         if (categoryOptions.length > 0) {
+            //             selectedOptionsSummary += `<p>${$(this).find('legend').text().trim()}： ${categoryOptions.join(', ')}</p>`;
+            //         }
+            //     }
+            // });
+            $('fieldset[data-category-id]').each(function() {
+                var categoryId = $(this).data('category-id');
+                var maxSelections = $(this).data('max-selections');
+                var categoryOptions = [];
+
+                // Check if current category uses dropdowns
+                if ($(this).find('select').length > 0) {
+                    var totalSelected = 0;
+                    $(this).find('select').each(function() {
+                        var selectedValue = parseInt($(this).val());
+                        totalSelected += selectedValue;
+                        if (selectedValue > 0) {
+                            categoryOptions.push($(this).next('.option-name').text() + 'x ' + selectedValue);
+                        }
+                    });
+
+                    if ((totalSelected < 1 && maxSelections !== 0) || totalSelected > maxSelections && maxSelections !== 0) {
+                        $(this).find('.notification').text('Please select at least one option.').show().delay(5000).fadeOut();
+                        isValid = false;
+                    }
+                } else { // Category uses checkboxes
+                    var checkedCheckboxes = $(this).find('input[type="checkbox"]:checked');
+                    if ((checkedCheckboxes.length < 1 && maxSelections !== 0) || checkedCheckboxes.length > maxSelections && maxSelections !== 0) {
+                        $(this).find('.notification').text('Please select at least one option.').show().delay(5000).fadeOut();
+                        isValid = false;
+                    } else {
+                        checkedCheckboxes.each(function() {
+                            var optionName = $(this).next('.option-name').text();
+                            categoryOptions.push(optionName);
+                        });
+                    }
+                }
+
+                if (categoryOptions.length > 0) {
+                    var legendText = $(this).find('legend').clone().find('.selection-info').remove().end().text().trim();
+                    selectedOptionsSummary += `<p"><strong>${legendText}：</strong> ${categoryOptions.join(', ')}</p>`;
+                }
+            });
+
+
+            if (isValid) {
+                ConfirmationPopUp(selectedOptionsSummary, form)
+            }
+
+            return false; // Prevent form submission in case of invalid selections
+        }
+
+        function ConfirmationPopUp(selectedOptionsSummary, form){
+            Swal.fire({
+                title: 'Confirmation',
+                html: selectedOptionsSummary,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                cancelButtonText: 'Cancel',
+                confirmButtonText: 'Proceed',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }else {
+                    return false;
+                }
+            });
+        }
+
+    </script>
+
+    <!-- <script>
+        function validateForm(form) {
+            event.preventDefault(); // Prevent the default form submission
+
+            const categoryFields = document.querySelectorAll('fieldset[data-category-id]');
+            const selectedOptionsByCategory = [];
+
+            for (const categoryField of categoryFields) {
+                const categoryId = categoryField.getAttribute('data-category-id');
+                const maxSelections = parseInt(categoryField.getAttribute('data-max-selections'), 10);
+                const selectedCheckboxes = categoryField.querySelectorAll('input[type="checkbox"]:checked');
+
+                // categoryId 3 is 是非必要選擇 
+                if (maxSelections > 0 && categoryId !== '3' && (selectedCheckboxes.length < 1 || selectedCheckboxes.length > maxSelections)) {
+                    const notification = categoryField.querySelector('.notification');
+                    notification.textContent = 'Please select at least one option.';
+                    setTimeout(() => {
+                        notification.textContent = '';
+                    }, 5000); 
+                    
+                    return false; 
+                }
+
+                if (selectedCheckboxes.length > 0) {
+                    const selectedOptions = Array.from(selectedCheckboxes).map(checkbox => {
+                        const label = checkbox.closest('label');
+                        return label ? label.textContent.trim() : ''; // Get the label text
+                    });
+                    selectedOptionsByCategory.push(`<strong>${categoryField.querySelector('legend').textContent}: </strong>${selectedOptions.join(', ')}`);
+                }
+            }
+
+            if (selectedOptionsByCategory.length > 0) {
+            // Prepare the confirmation message
+            const checkbox_summary = `You have selected the following options:<br>${selectedOptionsByCategory.join('<br>')}`;
+            
+            ConfirmationPopUp(checkbox_summary)
+            
+            return false;
+            } else {
+                // No options selected, show a message or take other action
+            }
+            return false;
+        }
+    </script>
+    
+
+    <script>
+        const categoryCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+        const categoryMaxSelections = {};
+        // Initialize the categoryMaxSelections object using data attributes
+        document.querySelectorAll('fieldset[data-category-id]').forEach(fieldset => {
+            const categoryId = fieldset.getAttribute('data-category-id');
+            const maxSelections = parseInt(fieldset.getAttribute('data-max-selections'));
+            categoryMaxSelections[categoryId] = maxSelections;
+            console.log("MaxSelection: ", maxSelections);
+        });
+
+        categoryCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                const category = checkbox.closest('fieldset');
+                const categoryId = category.dataset.categoryId;
+                const maxSelection = categoryMaxSelections[categoryId];
+
+                const selectedCheckboxes = category.querySelectorAll(':checked');
+                const notification = category.querySelector('.notification'); // Select the notification element
+
+                if (selectedCheckboxes.length > maxSelection) {
+                    checkbox.checked = false;
+                    // Display the notification
+                    notification.textContent = `You can select up to ${maxSelection} options for this category.`;
+                } else {
+                    // Clear the notification
+                    notification.textContent = '';
+                }
+            });
+        });
+    </script> -->
+
+
+    <script>
+        function increaseQuantity() {
+            var quantityInput = document.getElementById('quantity');
+            var quantity = parseInt(quantityInput.value);
+            if (quantity < 15) {  // Limit the quantity to a maximum of 15
+                quantityInput.value = quantity + 1;
+            }
+        }
+
+        function decreaseQuantity() {
+            var quantityInput = document.getElementById('quantity');
+            var quantity = parseInt(quantityInput.value);
+            if (quantity > 1) {  // Limit the quantity to a minimum of 1
+                quantityInput.value = quantity - 1;
+            }
+        }
+    </script>
+</body>
+{% include 'app_customer_interface/time_restriction.html' %}
+</html>

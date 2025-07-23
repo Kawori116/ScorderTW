@@ -1,0 +1,492 @@
+{% load static %}
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    {%include 'head_top.html'%}
+    <link href="/static/assets/css/loading.css" rel="stylesheet" type="text/css" />
+    <link href="/static/assets/css/kitchen_interface.css?v=20250405" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    {%include 'navbar_staff.html'%}
+    <section>
+        <input type="hidden" id="dish_time_warning" value="{{ dish_time_warning }}" />
+        <div class="container">
+            <div class="row justify-content-md-center">
+                <div class="col-md-12 col-xs-12">
+                    <div class="title-header">
+                        <h3 id="title-text" data-target-id="confirmed">Confirmed Order</h3>
+                    </div>
+                    <hr class="mt-0"/>
+                    <table id="kitchen-interface-table-confirmed" class="display">
+                        <thead>
+                            <tr>
+                               <th>Order No.</th>
+                               <th>Table</th>
+                               <th>Dish</th>
+                               <th>Dish Status</th>
+                               <th>Order Time</th>
+                               <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in confirmed_orders %}
+                                {% if order.status == 'confirmed' or order.status == 'processing' or order.status == 'completed' %}
+                                    {% for dish in order.dishes %}
+                                        <tr class="order-item {% if dish.status == 'completed' %} completed {% endif %}" data-order-id="{{ order.order_id }}" data-order-item-id="{{ dish.order_item_id }}">
+                                            <td class="order-number">{{ order.order_number }}</td>
+                                            <td>
+                                                {% if order.table_number != 0 %}
+                                                    {{ order.table_number }}
+                                                {% else %}
+                                                    {{ order.get_order_type_display }}
+                                                {% endif %}
+                                            </td>
+                                            <td class="dish-name" data-dish="{{ dish.name }}">
+                                                <!-- Display only one dish per row -->
+                                                {{ dish.name }} x{{ dish.quantity }}
+                                                {% if dish.customization_details and order.status != 'completed' %}
+                                                    <ul class="ordered_item-customization-list">
+                                                        {% for line in dish.customization_details|split_lines %}
+                                                            <li>{{ line }}</li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="order-status
+                                                    {% if dish.status == 'confirmed' %}status-confirmed
+                                                    {% elif dish.status == 'processing' %}status-processing
+                                                    {% elif dish.status == 'completed' %}status-completed
+                                                    {% endif %}" data-order="{{ order.order_number }}" data-order-item-id="{{ dish.order_item_id }}">
+                                                    {{ dish.status }}
+                                                </div>
+                                            </td>
+                                            <td class="order-timestamp" data-timestamp="{{ order.timestamp|date:'Y-m-d H:i' }}">
+                                                {{ order.timestamp|date:"Y-m-d H:i" }}
+                                            </td>
+                                            <td>
+                                                <div class="btn-wrap mb-3">
+                                                    <button class="accept-button accept-btn" data-order="{{order.order_number}}" data-order-item-id="{{dish.order_item_id }}" {% if dish.status != 'confirmed' %}disabled{% endif %}>Accept</button>
+                                                </div>
+                                                <div class="btn-wrap">
+                                                    <button class="mark-as-completed-btn complete-btn" data-order="{{order.order_number}}" data-order-item-id="{{dish.order_item_id }}" {% if dish.status != 'processing' %}disabled{% endif %}>Completed</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                     </table>
+                </div>
+            </div>
+        </div>
+    </section>
+    {%include 'footer.html'%}
+
+    <script>
+        $.fn.dataTable.ext.order['customStatusSort'] = function(settings, col) {
+            return this.api().column(col, {order:'index'}).nodes().map(function(td) {
+                var status = $(td).find('.order-status').text();
+                switch (status) {
+                    case 'confirmed':
+                        return '1';
+                    case 'processing':
+                        return '2';
+                    case 'completed':
+                        return '3';
+                    default:
+                        return '4';
+                }
+            });
+        };
+
+        function toCambodiaTime(utcTimestamp) {
+            const date = new Date(utcTimestamp + ':00Z');
+            return date.toLocaleString('en-US', {
+                timeZone: 'Asia/Phnom_Penh',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            }).replace(/(\d+)\/(\d+)\/(\d+), (\d+):(\d+)/, '$3-$1-$2 $4:$5');
+        }
+
+        function checkTimestampColor() {
+            const dishTimeWarning = parseInt($('#dish_time_warning').val(), 10);
+
+            $('.order-timestamp').each(function() {
+                const originalTime = $(this).data('timestamp');
+                
+                const formatteCambodiaTime = toCambodiaTime(originalTime);
+                $(this).text(formatteCambodiaTime);
+
+                const now = new Date();
+                const cambodiaNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Phnom_Penh' }));
+                const cambodiaDateTime = new Date(toCambodiaTime(originalTime));
+                const diffMs = cambodiaNow - cambodiaDateTime;
+                const diffMinutes = Math.floor(diffMs / 60000);
+
+                const orderItem = $(this).closest('tr')
+                if (diffMinutes > dishTimeWarning && !orderItem.hasClass('completed')) {
+                    $(this).addClass('urgent');
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            setTimeout(function() {
+                location.reload();
+            }, 60000);
+
+            setInterval(checkTimestampColor, 60000);
+
+            checkTimestampColor();
+
+           $('#kitchen-interface-table-confirmed').DataTable({
+                responsive: true,
+                pageLength : 5,
+                lengthMenu: [[5, 10, 20, -1], [5, 10, 20, 'All']],
+                autoWidth: false,
+                language: {
+                    paginate: {
+                        next: '❯',
+                        previous: '❮'
+                    }
+                },
+                columnDefs: [
+                    { orderDataType: 'statusPriority', targets: [3] }
+                ],
+                columns: [
+                    { width: '15%' },
+                    { width: '10%' },
+                    { width: '25%' },
+                    { width: '15%' },
+                    { width: '15%' },
+                    { width: '20%' }
+                ],
+                order: [[3, 'asc']] 
+            });
+        });
+    </script>
+    
+    <script>
+        function updateOrderStatus(action, orderItem, orderNumber, dishName) {
+            let statusText, removeClass, addClass, title, buttonToEnable;
+            let orderTime = orderItem.find('.order-timestamp');
+
+            if (action === 'accepted') {
+                statusText = 'processing';
+                removeClass = 'status-confirmed';
+                addClass = 'status-processing';
+                title = 'Dish Accepted';
+                buttonToEnable = '.mark-as-completed-btn';
+            } else if (action === 'completed') {
+                statusText = 'completed';
+                removeClass = 'status-processing';
+                addClass = 'status-completed';
+                title = 'Dish Completed';
+                buttonToEnable = null;
+                if(orderTime.hasClass('urgent')){
+                    orderTime.removeClass('urgent');
+                }
+            } else {
+                console.error('Invalid action:', action);
+                return;
+            }
+
+            if (orderItem.length) {
+                const statusElement = orderItem.find('.order-status');
+                statusElement.text(statusText)
+                        .removeClass(removeClass)
+                        .addClass(addClass);
+
+                if (buttonToEnable) {
+                    orderItem.find(buttonToEnable).prop('disabled', false);
+                }
+
+                if(action === 'completed'){
+                    orderItem.addClass('completed');
+                }
+            } else {
+                console.error('Order item not found for order ID:', orderNumber);
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: title,
+                html: `
+                    <p>Order <strong>ID: ${orderNumber}</strong></p><br>
+                    <p>Dish: <strong>${dishName}</strong> has been ${action}.</p>
+                `,
+                showConfirmButton: false,
+                timer: 2000
+            });
+        }
+
+        $(document).ready(function () {
+
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+            const socket = new WebSocket(wsProtocol + window.location.host + '/app_staff/ws/kitchen/');
+            // console.log("Got socket",socket);
+
+            socket.onopen = function (event) {
+                // console.log("WebSocket connection opened");
+                socket.send(JSON.stringify({ type: "test_message", content: "Hello, server!" }));
+
+                setInterval(function () {
+                    socket.send(JSON.stringify({ type: "ping" }));
+                    // console.log("Kitchen Ping sent");
+                }, 30000);  // Send a ping every 30 seconds 
+            };
+
+            socket.onerror = function (event) {
+                console.error("WebSocket error:", event);
+            };
+
+            socket.onmessage = function (event) {
+                const data = JSON.parse(event.data);
+                if (data.type === 'pong') {
+                    // console.log('Received Pong');
+                } else if (data.type === 'order.notification') {
+                    const orderDetails = data.order_details;
+                    const orderNo = orderDetails.order_number;
+                    const orderStatus = orderDetails.order_status;
+                    const order_type_display = orderDetails.order_type == 'take_out' ? 'Take Out' : 'Delivery';
+                    var audio = new Audio('/static/assets/audio/kitchen.mp3');
+                    audio.play();
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Order Accepted',
+                        html: `
+                            <p><strong>Order No.:</strong> ${orderDetails.order_number}</p>
+                            <p><strong>Table No.:</strong> ${orderDetails.table_number !== 0 ? orderDetails.table_number : order_type_display }</p>
+                            <h4><strong>Ordered Item:</strong></h4>
+                            <ul class="dish-list" style="list-style-type: none; padding-left: 20px;">
+                                ${orderDetails.dishes.map(dish => `<li>${dish.name} x${dish.quantity}</li>`).join('')}
+                            </ul>
+                        `, //  <p><strong>Table No.:</strong> ${getTableDisplayText(orderDetails.table_number)}</p>
+                        showConfirmButton: false,
+                        timer: 5000  // Display the notification for 8 seconds
+                    });
+                    
+                    var confirmedTable = $('#kitchen-interface-table-confirmed').DataTable();
+
+                    orderDetails.dishes.forEach(function(dish) {
+                        const orderItemId = dish.order_item_id;
+                        // const orderNo = dish.order_item_id;
+                        const dishStatus = dish.status;
+
+                        let date = new Date(orderDetails.order_time + ':00Z');
+                        const cambodiaTime = date.toLocaleString('en-US', { 
+                            timeZone: 'Asia/Phnom_Penh',
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                        }).replace(/(\d+)\/(\d+)\/(\d+), (\d+):(\d+)/, '$3-$1-$2 $4:$5')
+
+                        const existingOrderRow = confirmedTable.row(`tr[data-order-item-id="${orderItemId}"]`).node();
+
+                        if (existingOrderRow) {
+                            confirmedTable.cell(existingOrderRow, 3).data(`
+                                <div class="order-status 
+                                    ${dishStatus === 'confirmed' ? 'status-confirmed' : 
+                                    dishStatus === 'processing' ? 'status-processing' : 
+                                    dishStatus === 'completed' ? 'status-completed' : ''}" 
+                                    data-order-item-id="${orderItemId}">
+                                    ${dishStatus}
+                                </div>
+                            `).draw();
+                        } else {
+                            //${getTableDisplayText(orderDetails.table_number)} 
+                            const newRow = confirmedTable.row.add([
+                                `${orderDetails.order_number}`,
+                                `${orderDetails.table_number !== 0 ? orderDetails.table_number : order_type_display }`,
+                                `
+                                    ${dish.name} x${dish.quantity}
+                                    ${dish.customization_details ? `
+                                        <ul class="ordered_item-customization-list">
+                                            ${dish.customization_details.split('\n').map(line => `
+                                                <li>${line}</li>
+                                            `).join('')}
+                                        </ul>` : ''}
+                                `,
+                                `
+                                    <div class="order-status 
+                                        ${dishStatus === 'confirmed' ? 'status-confirmed' : 
+                                        dishStatus === 'processing' ? 'status-processing' : 
+                                        dishStatus === 'completed' ? 'status-completed' : ''}" 
+                                        data-order="${orderNo}" data-order-item-id="${orderItemId}">
+                                        ${dishStatus}
+                                    </div>
+                                `,
+                                `${cambodiaTime}`,
+                                ` 
+                                    <div>
+                                    <div class="btn-wrap mb-3">
+                                            <button class="accept-button accept-btn" 
+                                                    data-order="${orderNo}"
+                                                    data-order-item-id="${orderItemId}"  
+                                                    ${dishStatus !== 'confirmed' ? 'disabled' : ''}><p>Accept</p></button>
+                                        </div>
+                                        <div class="btn-wrap">
+                                            <button class="mark-as-completed-btn complete-btn"
+                                                    data-order="${orderNo}"
+                                                    data-order-item-id="${orderItemId}" 
+                                                    ${dishStatus !== 'processing' ? 'disabled' : ''}><p>Completed</p></button>
+                                        </div>
+                                    </div>
+                                `
+                            ]).node();
+
+                            newRow.setAttribute('data-order-item-id', orderItemId);
+
+                            const cells = newRow.querySelectorAll('td');
+                            cells[0].classList.add('order-number');
+                            cells[1].classList.add('table-number');
+                            cells[2].classList.add('dish-name');
+                            cells[2].setAttribute('data-dish', dish.name);
+                            cells[4].classList.add('order-timestamp');
+                            cells[4].setAttribute('data-timestamp', orderDetails.order_time);
+                            confirmedTable.draw();
+                        }
+
+                        checkTimestampColor();
+                    });
+                };
+                
+            };
+            
+            socket.onclose = function (event) {
+                console.log("WebSocket connection closed");
+            };
+
+            $(document).on('click', '.mark-as-completed-btn', function () {
+                const button = $(this);
+                const orderItemId = button.data('order-item-id');
+                const orderNo = button.data('order');
+                button.prop('disabled', true);
+                completeOrderItem(orderItemId, button, orderNo);
+            });
+
+            $(document).on('click', '.accept-button', function () {
+                const button = $(this);
+                const orderItemId = button.data('order-item-id');
+                const orderNo = button.data('order');
+                button.prop('disabled', true);
+                
+                acceptOrderItem(orderItemId, button, orderNo);
+            });
+            
+            function acceptOrderItem(orderItemId, button, orderNo) {
+                const csrftoken = getCookie('csrftoken');
+
+                $.ajax({
+                    url: '{% url "accept_order" %}',
+                    method: 'POST',
+                    data: { 'order_item_id': orderItemId },
+                    dataType: 'json',
+                    headers: { 'X-CSRFToken': csrftoken },
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                    },
+                    success: function (data) {
+                        if (data.status === 'success') {
+                            const orderItem = button.closest('tr');
+                            const orderItemId = orderItem.find('.order-status').data('order-item-id');
+                            const orderNumber = orderItem.find('.order-status').data('order');
+                            const dishName = orderItem.find('.dish-name').data('dish');
+
+                            updateOrderStatus('accepted', orderItem, orderNumber, dishName);
+                        } else {
+                            console.log('Failed to mark dish as accepted.');
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oh no...',
+                                text: 'An error has occurred, please try again later.',
+                            });
+                        }
+                    },
+                    error: function (xhr) {
+                        console.log(xhr.responseText);
+
+                        $(`.accept-button[data-order-item-id="${orderItemId}"]`).prop('disabled', false);
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oh no...',
+                            text: 'An error has occurred, please try again later.',
+                        });
+                    }
+                });
+            }
+
+            function completeOrderItem(orderItemId, button, orderNo) {
+                const csrftoken = getCookie('csrftoken');
+
+                $.ajax({
+                    url: '{% url "mark_order_completed" %}',
+                    method: 'POST',
+                    data: { 'order_item_id': orderItemId },
+                    dataType: 'json',
+                    headers: { 'X-CSRFToken': csrftoken },
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                    },
+                    success: function (data) {
+                        if (data.status === 'success') {
+                            const orderItem = button.closest('tr');
+                            const orderItemId = orderItem.find('.order-status').data('order-item-id');
+                            const orderNumber = orderItem.find('.order-status').data('order');
+                            const dishName = orderItem.find('.dish-name').data('dish');
+
+                            updateOrderStatus('completed', orderItem, orderNumber, dishName);
+                        } else {
+                            // console.log('Failed to mark dish as completed.');
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oh no...',
+                                text: 'An error has occurred, please try again later.',
+                            });
+                        }
+                    },
+                    error: function (xhr) {
+                        console.log(xhr.responseText);
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oh no...',
+                            text: 'An error has occurred, please try again later.',
+                        });
+                    }
+                });
+            }
+
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });
+    </script>
+</body>
+</html>

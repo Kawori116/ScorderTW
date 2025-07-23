@@ -1,0 +1,64 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    {%include 'head_top.html'%}
+    <link href="/static/assets/css/category.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    {%include 'navbar_owner.html'%}
+    <section>
+        <div class="container">
+            <div class="row justify-content-md-center">
+                <div class="col-md-12 col-xs-12">
+                    <div class="category-subheader">
+                        <a href="{% url 'category' %}">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <h3 id="title-text">Category</h3>
+                        </a>
+                        <p>Edit</p>
+                    </div>
+                    <hr class="mt-0"/>
+                    <form method="post" action="{% url 'update_category' %}">
+                        {% csrf_token %}
+                        <div class="input-wrapper">
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-3">
+                                    <label for="name" class="form-label">Category Name</label>
+                                </div>
+                                <div class="col-12 col-md-9">
+                                    <div class="input-group">
+                                        <input type="text" id="name" name="name" class="form-control" value="{{ category.name }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-3">
+                                    <label for="description" class="form-label">Category Description</label>
+                                </div>
+                                <div class="col-12 col-md-9">
+                                    <div class="input-group">
+                                        <textarea id="description" name="description" class="form-control" rows="4">{{ category.description }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="btn-wrap">
+                            <button class="btn save-btn"  onclick="setCategoryID('{{ category.category_id }}')">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    {%include 'footer.html'%}
+</body>
+<script>
+    function setCategoryID(categoryId) {
+        document.cookie = "category_id=" + categoryId + "; path=/";
+    }
+</script>
+</html>

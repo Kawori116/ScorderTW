@@ -1,0 +1,133 @@
+/* Cart List */
+.cart_dish-order {
+    display: flex;
+    flex-direction: column;
+    padding: 1em 0;
+}
+
+.cart_dish-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1em;
+    align-items: center;
+    word-break: break-word;
+    color: teal;
+    border-bottom: solid 5px #e6e6e6;
+    padding-bottom: 1em;
+}
+
+.cart_dish-list {
+    flex-direction: column;
+}
+
+.cart_dish-item {
+    display: flex;
+    padding: 0.75em 0;
+}
+
+.cart_dish-col {
+    display: inherit;
+    flex-direction: column;
+}
+
+.dish-col1 {
+    flex: 1 1 0%;
+}
+
+.dish-col2 {
+    padding-left: 0.5em;
+    justify-content: space-between;
+    text-align: end;
+}
+
+.cart_dish-name {
+    line-height: 1.5;
+}
+
+.cart_dish-quantity {
+    display: flex;
+    padding-top: 0.75em;
+    gap: 10px;
+    align-items: center;
+}
+
+.cart_dish-quantity .input-group {
+    width: 5rem !important;
+}
+
+.cart_dish-option-list {
+    flex-direction: column;
+    line-height: 1.5rem;
+    color: #777777;
+    font-size: 1rem;
+    margin: 1em 0;
+}
+
+.cart_dish-total-price {
+    line-height: 1.7;
+    letter-spacing: 1px;
+}
+
+.remove-btn {
+    background-color: transparent;
+}
+
+.remove-btn svg {
+    fill: teal;
+    cursor: pointer;
+    margin-bottom: 0.5em;
+}
+
+/* Contact Information */
+.contact-info-section{ 
+    border-top: solid 5px #e6e6e6;
+    padding: 1em 0;
+}
+
+.contact-info-section .order-type-info{
+    margin-bottom: 1em;
+    padding: .8em;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+/* Summary */
+.cart_summary-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.2;
+    padding: 1em 0;
+    border-top: solid 5px #e6e6e6;
+}
+
+.cart_summary-total-price {
+    letter-spacing: 1px;
+}
+
+/* Button */
+.place-order-wrapper,
+.keep-ordering-wrapper {
+    padding-top: 0.5rem;
+}
+
+.place-order-btn {
+    background-color: teal;
+}
+
+@media screen and (max-width:376px) {
+
+    select {
+        min-width: 5em;
+        padding: 0.5em 1em;
+    }
+
+    .cart_dish-option-list {
+        line-height: 1.3rem;
+        font-size: 0.9rem;
+    }
+
+}

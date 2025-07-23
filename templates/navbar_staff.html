@@ -1,0 +1,31 @@
+<nav class="navbar navbar-expand-md">
+    <div class="container">
+        <div class="navbar-nav">
+            <div class="nav-item">
+                <a class="nav-link main" href="{% url 'orders_dashboard' %}">Home</a>
+            </div>
+        </div>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'kitchen_interface' %}">Kitchen</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'update_management_mode' %}">System</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dish_management' %}">Item Management</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav logout">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}"><strong>Log Out</strong></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+{%include 'loading.html'%}

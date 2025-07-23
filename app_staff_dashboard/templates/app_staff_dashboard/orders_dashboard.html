@@ -1,0 +1,331 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    {%include 'head_top.html'%}
+    <link href="/static/assets/css/loading.css" rel="stylesheet" type="text/css" />
+    <link href="/static/assets/css/order_dashboard.css?v=20250308" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    {%include 'navbar_staff.html'%}
+    <section>
+        <div class="container">
+            <div class="row justify-content-md-center">
+                <div class="col-md-12 col-xs-12">
+                    <div class="title-header">
+                        <h3 id="title-text">Orders Dashboard</h3>
+                        <div class="accounting">
+                            <div id="today-date"></div>            
+                            <button id="todays-checkout">Today's Checkout</button>
+                        </div>
+                    </div>
+                    <hr/>
+                    <table id="incoming-orders-table" class="display">
+                        <thead>
+                           <tr>
+                              <th>Order No.</th>
+                              <th>Table</th>
+                              <th>Dish</th>
+                              <th>Order Status</th>
+                              <th>Order Time</th>
+                              <th>View Details</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in incoming_orders %}
+                                <tr data-order-id="{{ order.order_id }}">
+                                    <td class="order-number">{{ order.order_number }}</td>
+                                    <td class="table-number">
+                                        {% if order.table_number != 0 %}
+                                            {{ order.table_number }}
+                                        {% else %}
+                                            {{ order.get_order_type_display }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <ul class="dish-list">
+                                            {% for order_item in order.orderitem_set.all %}
+                                            <li class="dish-item" data-order-item-id="{{ order_item.order_item_id }}" data-status="{{ order_item.status }}">
+                                                {{ order_item.dish.name }} x{{ order_item.quantity }}
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </td>
+                                    <td>
+                                        <div class="order-status
+                                        {% if order.status == 'placed' %}status-placed
+                                        {% elif order.status == 'processing' %}status-processing
+                                        {% elif order.status == 'confirmed' %}status-confirmed
+                                        {% elif order.status == 'canceled' %}status-canceled
+                                        {% elif order.status == 'completed' %}status-completed
+                                        {% endif %}" 
+                                        >{{ order.status }}</div>
+                                    </td>
+                                    <td class="order-timestamp" data-timestamp="{{ order.timestamp|date:'Y-m-d H:i' }}">
+                                        {{ order.timestamp|date:"Y-m-d H:i" }}
+                                    </td>
+                                    <td>
+                                        <div class="btn-action-wrap">
+                                            <a href="{% url 'order_details' order.order_id %}" class="view-order">View</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+    {%include 'footer.html'%}
+
+    <script>
+        
+
+        $(document).ready(function() {
+            $('.order-timestamp').each(function() {
+                var originalTime = $(this).data('timestamp');
+                
+                var date = new Date(originalTime + ':00Z');
+                
+                var cambodiaTime = date.toLocaleString('en-US', { 
+                    timeZone: 'Asia/Phnom_Penh',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                }).replace(/(\d+)\/(\d+)\/(\d+), (\d+):(\d+)/, '$3-$1-$2 $4:$5');
+                
+                $(this).text(cambodiaTime);
+            });
+
+            $('#incoming-orders-table').DataTable({
+                responsive: true,
+                pageLength : 5,
+                autoWidth: false,
+                language: {
+                    paginate: {
+                        next: '❯',
+                        previous: '❮'
+                    }
+                },
+                columns: [
+                    { width: '15%' },
+                    { width: '10%' },
+                    { width: '30%' },
+                    { width: '15%' },
+                    { width: '15%' },
+                    { width: '15%' }
+                ]
+            });     
+      
+            // get today's date
+            var today = new Date();
+            var date = today.getDate() + '/' + (today.getMonth() + 1) + '/' + today.getFullYear();
+            
+            $('#today-date').text(date);
+        
+            $('#todays-checkout').click(function(){
+                const csrftoken = getCookie('csrftoken');
+                $.ajax({
+                    url: '{% url "get_total_amount" %}',
+                    method: 'POST',
+                    dataType: 'json',
+                    headers: { 'X-CSRFToken': csrftoken },
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                    },
+                    success: function (response) {
+                        Swal.fire({
+                            title: 'Total Amount',
+                            text: 'Today\'s Total Amount: ' + response.total_amount,
+                            icon: 'info'
+                        });
+                    },
+                    error: function(error){
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Something went wrong!',
+                            icon: 'error'
+                        });
+                    }
+                });
+            });
+
+            // websocket connection for orders
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+            const socket = new WebSocket(wsProtocol + window.location.host + '/app_staff/ws/orders/');
+            console.log("Got socket", socket)
+            console.log("WebSocket connection status:", socket.readyState);
+
+            socket.onopen = function (event) {
+                console.log("WebSocket connection opened");
+                socket.send(JSON.stringify({ type: "test_message", content: "Hello, server!" }));
+
+                setInterval(function () {
+                    socket.send(JSON.stringify({ type: "ping" }));
+                    // console.log("Order Ping sent");
+                }, 30000);  // Send a ping every 30 seconds (adjust the interval as needed)
+            };
+
+            socket.onerror = function (event) {
+                console.error("WebSocket error:", event);
+            };
+
+            socket.onmessage = function (event) {
+                const data = JSON.parse(event.data);
+
+                if (data.type === 'pong') {
+                    // Acknowledge the receipt of the pong message (no specific action needed)
+                } else if (data.type === 'order.notification') {
+                    const order_id = data.order_id;
+                    const order_number = data.order_number;
+                    const table_number = data.table_number;
+                    const order_type_display = data.order_type == 'take_out' ? 'Take Out' : 'Delivery';
+                    const order_items = data.order_item;
+                    const order_time = data.order_time;
+                    const order_status = data.order_status;
+
+                    // Create a list of dish names and quantities
+                    const dishList = order_items.map(item => {
+                        return `<li class="dish-item" data-order-item-id="${item.order_item_id}" data-status="${item.status}">${item.dish_name} x${item.quantity}</li>`;
+                    }).join('');
+
+                    const dataTable = $('#incoming-orders-table').DataTable();
+
+                    const newRowData = [
+                        order_number,
+                        table_number !== 0 ? table_number : order_type_display ,
+                        '<ul class="dish-list">' + dishList + '</ul>',
+                        `<p class="order-status status-${order_status.toLowerCase()}">Placed</p>`,
+                        order_time,
+                        `<div class="btn-action-wrap"><a href="/app_staff/order/${order_id}" class="view-order">View</a></div>`
+                    ];
+                    dataTable.row.add(newRowData).draw();
+
+                    var audio = new Audio('/static/assets/audio/order.mp3');
+                    audio.play();
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'New Order Placed',
+                        html: `Order Number.: <span id="popup-order-number">${data.order_number}</span>`,
+                        showConfirmButton: false,
+                        timer: 5000 // Auto close after 5 seconds
+                    });
+
+                }
+            };
+
+            socket.onclose = function (event) {
+                // console.log("WebSocket connection closed");
+            };
+
+
+            // websocket connection for kitchen
+            const WsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+            const kitchenSocket = new WebSocket(WsProtocol + window.location.host + '/app_staff/ws/kitchen/');
+            // console.log("Got acceptSocket", kitchenSocket);
+
+            kitchenSocket.onopen = function (event) {
+                // console.log("WebSocket connection opened");
+                kitchenSocket.send(JSON.stringify({ type: "test_message", content: "Hello, server!" }));
+
+                setInterval(function () {
+                    socket.send(JSON.stringify({ type: "ping" }));
+                    // console.log("Kitchen Ping sent");
+                }, 30000);  // Send a ping every 30 seconds (adjust the interval as needed)
+            };
+
+            kitchenSocket.onerror = function (event) {
+                console.error("WebSocket error:", event);
+            };
+
+            kitchenSocket.onmessage = function (event) {
+                const data = JSON.parse(event.data);
+
+                if (data.type === 'pong') {
+                    // console.log('Received Pong');
+                } else if (data.type === 'dish.accepted') {
+                    const accepted_item = data.accepted_item;
+                    updateStatus(accepted_item, data.order_status, "accepted");
+
+                } else if (data.type === 'dish.completed') {
+                    const completed_dish_data = data.completed_dish_data;
+                    updateStatus(completed_dish_data, data.order_status, "completed");
+                }
+            };
+
+            socket.onclose = function (event) {
+                // console.log("WebSocket connection closed");
+            };
+
+            function updateStatus(item, newOrderStatus, action){
+
+                const orderItemId = item.order_item_id;
+                const newItemStatus = item.item_status;
+                const order_type_display = item.order_type == 'take_out' ? 'Take Out' : 'Delivery';
+                const dishItem = $(`.dish-item[data-order-item-id="${orderItemId}"]`);
+                if (dishItem.length) {
+                    dishItem.attr('data-status', newItemStatus);
+                }
+
+                const orderId = item.order_id;
+                const statusCell = $(`tr[data-order-id="${orderId}"] .order-status`);
+                statusCell.removeClass('status-placed status-confirmed status-processing status-completed status-canceled')
+                        .addClass(`status-${newOrderStatus}`)
+                        .text(newOrderStatus);
+
+                let title;
+                if (action === 'accepted') {
+                    title = 'Dish Accepted';
+                } else if (action === 'completed') {
+                    title = 'Dish Completed';
+                } else {
+                    console.error('Invalid action:', action);
+                    return;
+                }
+                    
+                Swal.fire({
+                    icon: 'success',
+                    title: title,
+                    html: `
+                        <p><strong>Order No.: </strong>${item.order_number}</p>
+                        <p><strong>Table No.: </strong>${item.table_number !== 0 ? item.table_number : order_type_display }</p>
+                        <p><strong>Dish: </strong>${item.dish_name}</p>
+                    `,
+                    showConfirmButton: false,
+                    timer: 5000,
+                    timerProgressBar: true,
+                    toast: true,
+                    position: 'top-end',
+                    customClass: {
+                        popup: 'swal-wide'
+                    }
+                });
+            }
+        });
+    
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+
+</html>

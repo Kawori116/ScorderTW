@@ -1,0 +1,46 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    {%include 'head_top.html'%}
+    <link href="/static/assets/css/loading.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    {%include 'navbar_owner.html'%}
+    <section>
+        <div class="container">
+            <div class="row justify-content-md-center">
+                <div class="col-md-12 col-xs-12">
+                    <h3 id="title-text">Settings Management</h3>
+                    <hr />
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="input-wrapper">
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-3">
+                                    <label for="timeWarning" class="form-label">Dish Time Warning (minutes)</label>
+                                </div>
+                                <div class="col-12 col-md-9">
+                                    <div class="input-group">
+                                        <input type="number" id="timeWarning" name="dish_time_warning" class="form-control" value="{{ restaurant.dish_time_warning }}" min="1" required>
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        Current setting: {{ dish_time_display }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="btn-wrap">
+                            <button type="submit" class="btn save-btn">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    {%include 'footer.html'%}
+</body>
+</html>

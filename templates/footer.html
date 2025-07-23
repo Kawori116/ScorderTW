@@ -1,0 +1,30 @@
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            Designed by Juliana
+        </div>
+    </div>
+</footer>
+
+<script src="/static/assets/js/all.min.js"></script><!-- fontawesome -->
+<script src="/static/assets/js/jquery-3.7.1.min.js"></script>
+<script src="/static/assets/js/bootstrap.min.js"></script>
+<script src="/static/assets/js/datatables.min.js"></script>
+<script src="/static/assets/js/sweetalert2.min.js"></script>
+<script src="/static/assets/js/script.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $(document).ajaxStart(function() {
+            $('.loading-overlay').fadeIn(200);
+        });
+
+        $(document).ajaxStop(function() {
+            $('.loading-overlay').fadeOut(200);
+        });
+
+        $(document).ajaxError(function(event, jqxhr, settings, thrownError) {
+            $('.loading-overlay').fadeOut(200);
+        });
+    });
+</script>

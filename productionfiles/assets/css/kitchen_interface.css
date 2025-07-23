@@ -1,0 +1,40 @@
+/* Table */
+.dish-list {
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ordered_item-customization-list {
+    display: flex;
+    flex-direction: column;
+    color: var(--accent);
+    width: 20em;
+    gap: 5px;
+    padding: .5em 1em;
+    background-color: var(--light-gray);
+    border-radius: var(--border-radius);
+}
+
+/* Action Column */
+.btn-wrap button {
+    width: calc(100% - 2em);
+    padding: 0.5em;
+}
+
+.btn-wrap button:disabled {
+    opacity: .5;
+}
+
+tr.completed {
+    opacity: 0.5;
+}
+
+.urgent {
+    color: var(--red);
+}
+
+@media screen and (max-width: 860px) {
+    .ordered_item-customization-list {
+        width: 15em;
+    }
+}

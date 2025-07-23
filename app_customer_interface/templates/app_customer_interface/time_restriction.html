@@ -1,0 +1,14 @@
+{% if not system_open %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            Swal.fire({
+                icon: 'info',
+                title: 'System Closed',
+                text: 'The restaurant is currently closed. Please return during opening hours.',
+                showConfirmButton: false,  // Remove the "Confirm" button
+                allowOutsideClick: false,  // Disable clicking outside to close
+            });
+        });
+    </script>
+{% endif %}
+

@@ -1,0 +1,119 @@
+#management-mode-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.system-card {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    height: 15em;
+    gap: 2em;
+}
+
+.col {
+    flex: 1;
+    padding: 1.5em;
+    border-radius: var(--border-radius);
+    background-color: var(--white);
+    transition: .3s ease;
+    height: 100%;
+}
+
+.col h3,
+.status-wrap {
+    margin-bottom: 1em;
+}
+
+.col:hover {
+    box-shadow: var(--box-shadow-light);
+}
+
+/* Column 1 */
+.radio-container {
+    display: flex;
+    gap: 1em;
+}
+
+.radio-wrap {
+    flex: 1em;
+}
+
+.radio-wrap>label {
+    text-align: center;
+    padding: 1em;
+    width: 100%;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .3s ease;
+    border: solid 1px var(--light-grey);
+    margin: 0;
+}
+
+.radio-wrap>label:hover {
+    background-color: var(--light-grey);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+}
+
+label.active {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.radio-wrap input[type="radio"] {
+    display: none;
+}
+
+input:focus {
+    border: solid 1px var(--accent);
+}
+
+/* Column 2 */
+.system-status,
+.management-mode {
+    padding: 1em 0;
+    margin-bottom: 1em;
+}
+
+.system-status>span,
+.management-mode>span {
+    font-weight: 700;
+    margin-left: 0.5em;
+}
+
+.btn-wrap>button {
+    background-color: var(--accent);
+    border: solid 1px var(--accent);
+    color: var(--white);
+    padding: 1em;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.close-btn {
+    width: 100%;
+}
+
+@media screen and (max-width: 768px) {
+    .system-card {
+        height: initial;
+        gap: 1em;
+    }
+
+    /* .col {
+        width: 100%;
+        height: initial;
+    } */
+
+    .col:nth-child(2) {
+        margin: 1em 0;
+    }
+}

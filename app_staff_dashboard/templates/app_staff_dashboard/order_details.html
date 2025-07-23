@@ -1,0 +1,534 @@
+{% load static %}
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    {%include 'head_top.html'%}
+    <link href="/static/assets/css/loading.css" rel="stylesheet" type="text/css" />
+    <link href="/static/assets/css/order_details.css?v=20250624" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    {%include 'navbar_staff.html'%}
+    <section>
+        <div class="container">
+            <div class="row justify-content-md-center">
+                <div class="col-md-12 col-xs-12">
+                    <div class="title-header">
+                        <div class="text-subheader">
+                            <a href="{% url 'orders_dashboard' %}">
+                                <i class="fa-solid fa-arrow-left"></i>
+                                <h3 id="title-text">Orders Details</h3>
+                            </a>
+                        </div>
+                        <div class="order-info-container">
+                            <div class="order-info-wrapper">
+                                <h3 class="order-info-no">{{ order.order_number}}</h3>
+                                <div class="order-info">
+                                    <div class="order-info_table-no">
+                                        {% if order.table_number != 000 %}
+                                            Table No.:<span> #{{ order.table_number }}</span>
+                                        {% else %}
+                                            {{ order.get_order_type_display }}
+                                        {% endif %}
+                                    </div>
+                                    <div class="order-info_status">Status: <span id="order-status">{{ order.status }}</span></div>
+                                </div>
+                            </div>
+                            {% if order.table_number == 000 %}
+                                <div class="order-info-contact">
+                                    {% if order.order_type == 'delivery' %}
+                                    <p>Address: {{order.delivery_address}}</p>
+                                    {% endif %}
+                                    <p>Contact: {{order.phone_number}}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <hr class="mt-0"/>
+                    <input type="hidden" id="order-id" value="{{ order.order_id }}">
+                    <table id="order-detail-table" class="display">
+                        <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            {% for order_item in order.orderitem_set.all %}
+                            <tr class="parent-row {% if order_item.dish.customization_available %} custom {% endif %}">
+                                <td class="dish-name">{{ order_item.dish.name }}</td>
+                                <td>${{ order_item.dish.price }}</td>
+                                <td>
+                                    {% if order.status == 'placed'%}
+                                    <div class="input-group">
+                                        <select class="form-control quantity-dropdown" data-item-id="{{ order_item.order_item_id }}">
+                                            {% for quantity in quantities %}
+                                            <option class="quantity" value="{{ quantity }}" {% if order_item.quantity == quantity %}selected{% endif %}>
+                                                {{ quantity }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    {% else %}
+                                    {{ order_item.quantity }}
+                                    {% endif %}
+                                </td>
+                                <td style="width: 15%;" data-order-item-id="{{ order_item.order_item_id }}">
+                                    <div class="order-status
+                                        {% if order_item.status == 'confirmed' %}status-confirmed
+                                        {% elif order_item.status == 'placed' %}status-placed
+                                        {% elif order_item.status == 'processing' %}status-processing
+                                        {% elif order_item.status == 'completed' %}status-completed
+                                        {% endif %}" data-order="{{ order.order_id }}">
+                                        {{ order_item.status }}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if order.status == 'placed'%}
+                                    <form class="delete-order-item-form" data-item-id="{{ order_item.pk }}">
+                                        {% csrf_token %}
+                                        <div class="action-container">
+                                            <div class="btn-wrap">
+                                                <button type="submit" class="btn delete-btn"><p>Delete</p></button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                    {% else %}
+                                    <div class="action-container">
+                                        <div class="btn-wrap">
+                                            <button type="submit" class="btn delete-btn" disabled>Delete</button>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% if order_item.dish.customization_available %}
+                            <tr class="child-row">
+                                <td colspan="5" class="customization-details">
+                                    <p>Extra Charges: ${{ order_item.extra_charges }}</p>
+                                    <p><strong>Options</strong></p>
+                                    {% if order_item.customization_details %}
+                                    <ul>
+                                        {% for line in order_item.customization_details|split_lines %}
+                                            <li>{{ line }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="order-total-container">
+                        <div class="order-total">
+                            <h4 class="order-info_status">Total Amount: <span class="total-amount">${{ order.total_amount }}</span></h4>
+                        </div>
+                    </div>
+                    {% if order.status == 'placed'%}    
+                    <hr>
+                    <div class="btn-container">
+                        <div class="btn-wrap">
+                            <button class="btn cancel-order-btn" data-order-id="{{ order.order_id }}">Cancel</button>
+                        </div>
+                        <div class="btn-wrap">
+                            <button class="btn confirm-order-btn">Confirm</button>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+       
+    </section>
+
+    {%include 'footer.html'%}
+
+    <script>
+
+        $(document).ready(function() {
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+            const socket = new WebSocket(wsProtocol + window.location.host + '/app_staff/ws/kitchen/');
+            // console.log("Got acceptSocket", socket);
+
+            socket.onopen = function (event) {
+                socket.send(JSON.stringify({ type: "test_message", content: "Hello, server!" }));
+
+                setInterval(function () {
+                    socket.send(JSON.stringify({ type: "ping" }));
+                    // console.log("Kitchen Ping sent");
+                }, 30000);
+            };
+
+            socket.onerror = function (event) {
+                console.error("WebSocket error:", event);
+            };
+
+            socket.onmessage = function (event) {
+                const data = JSON.parse(event.data);
+
+                if (data.type === 'pong') {
+                } else if (data.type === 'dish.accepted') {
+                    const accepted_item = data.accepted_item;
+                    updateStatus(accepted_item, "accepted");
+
+                } else if (data.type === 'dish.completed') {
+                    const completed_dish_data = data.completed_dish_data;
+                    const orderStatus = data.order_status;
+                    updateStatus(completed_dish_data, "completed");
+                    $("#order-status").text(orderStatus);
+                }
+
+                function updateStatus(item, action){
+                    const orderItemId = item.order_item_id;
+                    const newItemStatus = item.item_status;
+                    const order_type_display = item.order_type == 'take_out' ? 'Take Out' : 'Delivery';
+                    
+                    let title;
+                    if (action === 'accepted') {
+                        title = 'Dish Accepted';
+                    } else if (action === 'completed') {
+                        title = 'Dish Completed';
+                    } else {
+                        console.error('Invalid action:', action);
+                        return;
+                    }
+                    
+                    const statusCell = $(`td[data-order-item-id="${orderItemId}"] .order-status`);
+                    statusCell.removeClass('status-confirmed status-processing status-completed')
+                            .addClass(`status-${newItemStatus}`)
+                            .text(newItemStatus);
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: title,
+                        html: `
+                            <p><strong>Order No.: </strong>${item.order_number}</p>
+                            <p><strong>Table No.: </strong>${item.table_number !== 0 ? item.table_number : order_type_display }</p>
+                            <p><strong>Dish: </strong>${item.dish_name}</p>
+                        `,
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true,
+                        toast: true,
+                        position: 'top-end',
+                        customClass: {
+                            popup: 'swal-wide'
+                        }
+                    });
+                }
+
+            };
+
+            $('.parent-row').click(function () {
+                $(this).next('.child-row').slideToggle('slow');
+            });
+
+            $('.quantity-dropdown').change(function () {
+                const dropdown = $(this);
+                const item_id = dropdown.data('item-id');
+                const quantity = dropdown.val();
+
+                const csrftoken = getCookie('csrftoken');
+
+                $.ajax({
+                    url: '{% url "update_order_item" %}',
+                    method: 'POST',
+                    data: { 'item_id': item_id, 'quantity': quantity },
+                    dataType: 'json',
+                    headers: { 'X-CSRFToken': csrftoken },
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                    },
+                    success: function (data) {
+                        const quantityElement = dropdown.closest('.quantity-info').find('.quantity');
+                        quantityElement.text(quantity);
+
+                        const totalAmountElement = $('.total-amount');
+                        // Check if total_amount is a valid number before updating
+                        const totalAmount = parseFloat(data.total_amount);
+                        totalAmountElement.text('$' + totalAmount.toFixed(2));
+                    },
+                    error: function (xhr) {
+                        // console.log(xhr.responseText);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oh no...',
+                            text: 'An error has occurred, please try again later.',
+                        });
+                    }
+                });
+            });
+
+            $('.delete-order-item-form').submit(function (event) {
+                event.preventDefault();
+                const form = $(this);
+                const item_id = form.data('item-id');
+
+                const order_id = $('#order-id').val();
+
+                // Check the total number of items in the order
+                const totalItems = $('.delete-order-item-form').length;
+
+                if (totalItems === 1) {
+                    // Show a confirmation modal for canceling the order
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Cancel Order',
+                        html: '<p>This is the <strong>final item</strong> in the order.<br>Are you sure you want to cancel the <strong>entire order</strong>?</p>',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'Confirm',
+                        cancelButtonText: 'Keep',
+                        reverseButtons: true 
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            cancelOrder(order_id);
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Delete Item',
+                        html: '<p>Are you sure you want to <strong>delete this item</strong>?</p>',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'Delete',
+                        cancelButtonText: 'Keep',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            performItemDeletion(item_id);
+                        }
+                    });
+                }
+            });
+
+            
+            $('.confirm-order-btn').click(function () {
+                const orderId = $('#order-id').val();
+
+                // Prepare the order preview message
+                let orderPreview = '<ul>';
+                $('.quantity-info').each(function () {
+                    const itemName = $(this).siblings('.dish-name').text();;
+                    const itemQuantity = $(this).find('.quantity-dropdown option').val();
+                    orderPreview += `<li>${itemName} x${itemQuantity}</li>`;
+                });
+                orderPreview += '</ul>';
+
+                // Calculate and add the total amount to the preview
+                const totalAmount = $('.total-amount').text();
+                orderPreview += `<p>Total Amount: ${totalAmount}</p>`;
+
+                Swal.fire({
+                    icon: 'question',
+                    title: 'Confirm Order',
+                    html: `Are you sure you wish to confirm this order?<br>${orderPreview}`,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'No',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        confirmOrder(orderId);
+                    }
+                });
+            });
+            
+            $('.cancel-order-btn').click(function () {
+                const orderId = $(this).data('order-id');
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Cancel Order',
+                    text: 'Are you sure you want to cancel this order?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'No',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        cancelOrder(orderId);
+                    }
+                });
+            });
+
+        });
+
+        function performItemDeletion(item_id) {
+            const csrftoken = getCookie('csrftoken');
+
+            $.ajax({
+                url: '{% url "delete_order_item" %}',
+                method: 'POST',
+                data: { 'item_id': item_id },
+                dataType: 'json',
+                headers: { 'X-CSRFToken': csrftoken },
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                },
+                success: function (data) {
+                    if (data.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Delet Item',
+                            html: `
+                                <p>Item successfully deleted.</p>
+                                <p>Total Amount: <strong>$${parseFloat(data.total_amount).toFixed(2)}</strong></p>
+                            `,
+                            showConfirmButton: false,
+                            timer: 2000,
+                        }).then(() => {
+                            window.location.reload();
+                        });
+
+                        // Remove the deleted item from the display
+                        $(`[data-item-id="${item_id}"]`).closest('li').remove();
+
+                        const totalAmountElement = $('.total-amount');
+
+                        // Check if total_amount is a valid number before updating
+                        const totalAmount = parseFloat(data.total_amount);
+                        totalAmountElement.text('$' + totalAmount.toFixed(2));
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Item Deletion Failed',
+                            html: `<p>Failure Reason: ${data.message}</p>`,
+                        });
+                    }
+                },
+                error: function (xhr) {
+                    // console.log(xhr.responseText);
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oh no...',
+                        text: 'An error has occurred, please try again later.',
+                    });
+                }
+            });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function confirmOrder(orderId) {
+            const csrftoken = getCookie('csrftoken');
+
+            $.ajax({
+                url: '{% url "confirm_order" %}',
+                method: 'POST',
+                data: { 'order_id': orderId },
+                dataType: 'json',
+                headers: { 'X-CSRFToken': csrftoken },
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                },
+                success: function (data) {
+                    if (data.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Order Confirmed',
+                            html: 'The order has been confirmed. Would you like to return to the Home page?',
+                            showConfirmButton: true,
+                            confirmButtonText: 'Back to Home',
+                            showCancelButton: true,
+                            cancelButtonText: 'Back to Order',
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '{% url "orders_dashboard" %}';
+                            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                                window.location.reload();
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oh no...',
+                            text: 'An error has occurred, please try again later.',
+                        });
+                    }
+                },
+                error: function (xhr) {
+                    // console.log(xhr.responseText);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oh no...',
+                        text: 'An error has occurred, please try again later.',
+                    });
+                }
+            });
+        }
+
+        function cancelOrder(orderId) {
+            const csrftoken = getCookie('csrftoken');
+
+            $.ajax({
+                url: '{% url "cancel_order" %}',
+                method: 'POST',
+                data: { 'order_id': orderId },
+                dataType: 'json',
+                headers: { 'X-CSRFToken': csrftoken },
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                },
+                success: function (data) {
+                    if (data.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Order successfully cancelled',
+                            html: `
+                                <p><strong>Order Id:</strong> ${orderId}</p>
+                                <p>Order successfully deleted.</p>
+                            `,
+                            showConfirmButton: false,
+                            timer: 2000,
+                        });
+
+                        setTimeout(function() {
+                            window.location.href = '{% url "orders_dashboard" %}';
+                        }, 2500);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oh no...',
+                            text: 'An error has occurred, please try again later.',
+                        });
+                    }
+                },
+                error: function (xhr) {
+                    // console.log(xhr.responseText);
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oh no...',
+                        text: 'An error has occurred, please try again later.',
+                    });
+                }
+            });
+        }
+    </script>
+
+</body>
+
+</html>

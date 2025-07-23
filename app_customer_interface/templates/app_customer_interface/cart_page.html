@@ -1,0 +1,618 @@
+<!-- app_customer_interface/templates/app_customer_interface/cart_page.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html>
+    
+<head>
+    {%include 'chead_top.html'%}
+    <link href="/static/assets/css/tool/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/static/assets/css/cart.css?v=20250623" rel="stylesheet" type="text/css" />
+    <style>
+        .error-message {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    {%include 'loading.html'%}
+    {% if cart_items %}
+        <section>
+            <main>
+                <div class="cart_dish-order">
+                    <div class="cart_dish-heading"><h3>Order</h3>
+                        <strong>
+                            {% if table_number != 000 %}
+                                Table No.<span> #{{ table_number }}</span>
+                            {% else %}
+                                <span id="order-type-display"></span>
+                            {% endif %}
+                        </strong>
+                    </div> 
+                    
+                    <ul class="cart_dish-list">
+                        {% for item in cart_items %}
+                    
+                        <li class="cart-item cart_dish-item" data-item-id="{{ item.dish.pk }}">
+                            <input type="hidden" name="cart_item_identifier" value="{{ item.cart_item_identifier }}" />
+                            <div class="cart_dish-col dish-col1">
+                                <h5 class="cart_dish-name">{{ item.dish.name }}
+                                    {% if item.dish.is_sold_out %}
+                                        <span class="error-message">Sold Out</span>
+                                    {% endif %}
+                                </h5>
+                                <div class="cart_dish-quantity">
+                                    <div class="input-group">
+                                        <select class="form-control quantity-dropdown" data-item-id="{{ item.dish.pk }}" data-cart-item-identifier="{{ item.cart_item_identifier }}">
+                                            {% for quantity in quantities %}
+                                            <option value="{{ quantity }}" {% if item.quantity == quantity %}selected{% endif %}>{{ quantity }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <input type="hidden" name="cart_item_identifier" value="{{ item.cart_item_identifier }}" />
+                                    <div class="cart_dish-price"><span>x</span> ${{ item.dish.price }}</div>
+                                </div>
+                                {% if item.selected_options %}
+                                <div class="selected-options">
+                                    <ul class="cart_dish-option-list ">
+                                        {% for category, details in item.selected_options.items %}
+                                            <li>{{ details.category_name }}: {{ details.options|join:', ' }}</li>
+                                        {% endfor %}
+                                        {% if item.dish.customization_available %}
+                                            <div class="extra-charges cart_dish-extra-charges"><span>Extra Charges:</span>${{ item.extra_charges }}</div>
+                                            <input type="hidden" id="extra-charges-value" value="{{ item.extra_charges }}">
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="cart_dish-col dish-col2">
+                                <div class="item-total-price cart_dish-total-price" data-cart-item-identifier="{{ item.cart_item_identifier }}">${{ item.item_total_price }}</div>
+                                <div class="remove-btn">
+                                    <form method="post" action="{% url 'remove_item_from_cart' encrypted_table_number=encrypted_table_number %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="cart_item_identifier" value="{{ item.cart_item_identifier }}">
+                                        <button type="submit" class="remove-btn">
+                                            <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="25" height="25" viewBox="0 0 50 50">
+                                            <path d="M 21 2 C 19.354545 2 18 3.3545455 18 5 L 18 7 L 8 7 A 1.0001 1.0001 0 1 0 8 9 L 9 9 L 9 45 C 9 46.654 10.346 48 12 48 L 38 48 C 39.654 48 41 46.654 41 45 L 41 9 L 42 9 A 1.0001 1.0001 0 1 0 42 7 L 32 7 L 32 5 C 32 3.3545455 30.645455 2 29 2 L 21 2 z M 21 4 L 29 4 C 29.554545 4 30 4.4454545 30 5 L 30 7 L 20 7 L 20 5 C 20 4.4454545 20.445455 4 21 4 z M 19 14 C 19.552 14 20 14.448 20 15 L 20 40 C 20 40.553 19.552 41 19 41 C 18.448 41 18 40.553 18 40 L 18 15 C 18 14.448 18.448 14 19 14 z M 25 14 C 25.552 14 26 14.448 26 15 L 26 40 C 26 40.553 25.552 41 25 41 C 24.448 41 24 40.553 24 40 L 24 15 C 24 14.448 24.448 14 25 14 z M 31 14 C 31.553 14 32 14.448 32 15 L 32 40 C 32 40.553 31.553 41 31 41 C 30.447 41 30 40.553 30 40 L 30 15 C 30 14.448 30.447 14 31 14 z"></path>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% if table_number == 000 %}
+                <div class="contact-info-section">
+                    <h5 class="mb-3">Contact Information</h5>
+                    
+                    <div class="order-type-info">
+                        <strong>Order Type: <span id="cart-order-type">Loading...</span></strong>
+                    </div>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-12 col-md-3">
+                                <label for="phone_number" class="form-label">Phone Number *</label>
+                            </div>
+                            <div class="col-12 col-md-9">
+                                <div class="input-group">
+                                    <input type="tel" id="phone_number" name="phone_number" required 
+                                class="form-control" placeholder="0912345678">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="delivery-address-group" class="row" style="display: none;" >
+                            <div class="col-12 col-md-3">
+                                <label for="delivery_address" class="form-label">Delivery Address *</label>
+                            </div>
+                            <div class="col-12 col-md-9">
+                                <!-- <small class="form-text text-muted">填寫格式：縣市、鄉鎮市區、村里、鄰、路街名、巷弄衖、號、樓層</small> -->
+                                <div class="input-group">
+                                    <textarea id="delivery_address" name="delivery_address" class="form-control" rows="3" 
+                                    placeholder="Enter your complete delivery address"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </main>
+            <div>
+                <div class="cart_summary-wrapper">
+                    <div class="cart_summary-total-text">Total:</div>
+                    <div class="total-amount cart_summary-total-price">${{ total_amount }}</div>
+                </div>
+                <div class="place-order-wrapper">
+                    <button class="bg-btn place-order-btn">Place Order</button>
+                </div>
+                <div class="keep-ordering-wrapper">
+                    <a href="{% url 'index' encrypted_table_number=encrypted_table_number %}">
+                        <button class="bg-btn keep-btn ">Keep Ordering</button>
+                    </a>
+                </div>
+            </div>
+        </section>
+    {% else %}
+        <!-- Empty cart message container -->
+        <section>
+            <div class="container">
+                <div id="empty-cart-message" class="keep-ordering-wrapper">
+                    <h4 class="error-text">
+                        No items in your cart.
+                    </h4>
+                    <a href="{% url 'index' encrypted_table_number=encrypted_table_number %}">
+                        <button class="bg-btn keep-btn ">Look for the dishes</button>
+                    </a>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+    {%include 'footer.html'%}
+    
+
+
+    <script>
+        $(document).ready(function () {
+
+            const table_number = "{{table_number}}";
+            
+            if(table_number == "0"){
+                initializeCartPage();
+            } else {
+                localStorage.removeItem('order_type');
+            }
+
+            // Get the value of item.extra_charges from the hidden input field
+            const clientOrderType = localStorage.getItem('order_type');
+            if(clientOrderType){
+                const displayText = clientOrderType === 'take_out' ? 'Take Out' : 'Delivery';
+                $('#order-type-display').text(displayText);
+            }
+           
+            var extraCharges = parseFloat($("#extra-charges-value").val());
+
+            if (extraCharges === 0) {
+                $(".extra-charges").hide();
+            }
+
+            // Function to handle "Place Order" button click
+            $('.place-order-btn').click(function () {
+                
+                // Get order type from localStorage
+                const orderType = getOrderTypeFromStorage();
+                
+                if(orderType !== null){
+                     // Validate order type first
+                    if (!isValidOrderType(orderType)) {
+                        Swal.fire({
+                            title: 'Order Type Missing',
+                            text: 'Please select your order type first.',
+                            icon: 'error',
+                            confirmButtonText: 'Back to Home',
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '{% url "index" encrypted_table_number=encrypted_table_number %}';
+                            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                                window.location.reload();
+                            }
+                        });
+                        return false;
+                    }
+                    
+                    // Validate required fields
+                    const validationResult = validateRequiredFields(orderType);
+                    
+                    if (!validationResult.isValid) {
+                        // Show validation error
+                        Swal.fire({
+                            title: 'Required Information Missing',
+                            text: validationResult.message,
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            // Focus on the first invalid field
+                            if (validationResult.focusElement) {
+                                validationResult.focusElement.focus();
+                                // Add visual feedback
+                                validationResult.focusElement.addClass('is-invalid');
+                                setTimeout(() => {
+                                    validationResult.focusElement.removeClass('is-invalid');
+                                }, 3000);
+                            }
+                        });
+                        return false;
+                    }
+                }
+
+                const totalAmount = $('.total-amount').text();
+
+                const cartItemsIds = [];
+                // Loop through each cart item and retrieve its item ID
+                $('.cart-item').each(function () {
+                    cartItemsIds.push($(this).data('item-id'));
+                });
+                
+                $.ajax({
+                    url: '{% url "check_cart_for_sold_out_items" encrypted_table_number=encrypted_table_number %}', // Create a new endpoint to check the cart
+                    method: 'POST',
+                    data: { 'cart_items_ids': cartItemsIds },
+                    dataType: 'json',
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                    },
+                    success: function (data) {
+                        if (data.has_sold_out_items) {
+                            // console.log("sold out:",data.has_sold_out_items);
+                            // console.log("sold out items:",data.sold_out_items);
+                            Swal.fire({
+                                title: 'Sold Out Items',
+                                html: `<div class="sold-out-message">
+                                        <p>Some items are currently unavailable for order.</p>
+                                        <p>Please remove the sold-out items to proceed.</p>
+                                    </div>`,
+                                icon: 'warning',
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    location.reload();
+                                }
+                            });                            
+                        } else {
+                            Swal.fire({
+                                title: 'Confirm Order',
+                                html: `<p>You are about to place an order with a total amount of ${totalAmount}. Are you sure?<p>`,
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'Confirm',
+                                cancelButtonText: 'Cancel',
+                                reverseButtons: true,
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    placeOrder();
+                                }
+                            });
+                        }
+                    },
+                    error: function (xhr) {
+                        console.log(xhr.responseText);
+                    }
+                });
+            });
+
+            function isValidOrderType(orderType) {
+                return orderType === 'take_out' || orderType === 'delivery';
+            }
+
+            function validateRequiredFields(orderType) {
+                const phoneNumber = $('#phone_number');
+                const deliveryAddress = $('#delivery_address');
+                const deliveryAddressGroup = $('#delivery-address-group');
+                
+                if (!phoneNumber.val().trim()) {
+                    return {
+                        isValid: false,
+                        message: 'Please enter your phone number.',
+                        focusElement: phoneNumber
+                    };
+                }
+                
+                if (!isValidPhoneNumber(phoneNumber.val().trim())) {
+                    return {
+                        isValid: false,
+                        message: 'Please enter a valid phone number.',
+                        focusElement: phoneNumber
+                    };
+                }
+                
+                if (orderType === 'delivery' && deliveryAddressGroup.is(':visible')) {
+                    if (!deliveryAddress.val().trim()) {
+                        return {
+                            isValid: false,
+                            message: 'Please enter your delivery address.',
+                            focusElement: deliveryAddress
+                        };
+                    }
+                    
+                    // Validate minimum address length
+                    if (deliveryAddress.val().trim().length < 6) {
+                        return {
+                            isValid: false,
+                            message: 'Please enter a complete delivery address.',
+                            focusElement: deliveryAddress
+                        };
+                    }
+                }
+                
+                return {
+                    isValid: true,
+                    message: 'All fields are valid'
+                };
+            }
+
+            function isValidPhoneNumber(phone) {
+                // Remove all non-digit characters
+                const cleanPhone = phone.replace(/\D/g, '');
+                
+                return cleanPhone.length >= 10 && cleanPhone.length <= 15;
+            }
+
+            // Function to handle order placement (AJAX function)
+            function placeOrder() {
+
+                // Get the cart items and selected quantities
+                const cartItems = [];
+                $('.quantity-dropdown').each(function () {
+                    const item_id = $(this).data('item-id');
+                    const cart_item_identifier = $(this).data('cart-item-identifier');
+                    const quantity = $(this).val();
+
+                    // Check if this is a customizable item
+                    const isCustomizable = $(this).closest('li').find('.selected-options ul li').length > 0;
+
+                    const extraChargesText = $(this).closest('li').find('.extra-charges span').text();
+                    // console.log("extra charges: " + extraChargesText);
+                    const extraCharges = isCustomizable ? parseFloat($(this).closest('li').find('.extra-charges').text().replace(extraChargesText, '').replace('$', '')) : 0.0;
+                    const itemTotalPrice = parseFloat($(this).closest('li').find('.item-total-price').text().replace('$', ''));
+                    
+                    let itemData = { 'item_id': item_id, 'quantity': quantity, 'cart_item_identifier': cart_item_identifier, 'extra_charges': extraCharges,
+                    'item_total_price': itemTotalPrice,  };
+
+                    // If it's a customizable item, gather the selected options
+                    if (isCustomizable) {
+                        const selectedOptions = [];
+                        $(this).closest('li').find('.selected-options ul li').each(function () {
+                            const optionText = $(this).text();
+                            const colonIndex = optionText.indexOf(':');
+                            const category = optionText.substring(0, colonIndex);
+                            const options = optionText.substring(colonIndex + 2); 
+                            selectedOptions.push({ 'category': category, 'options': options });
+                        });
+                        itemData['selected_options'] = selectedOptions;
+                    }
+                    cartItems.push(itemData);
+                });
+
+                const tableNumber = '{{ table_number }}'; 
+                const timestamp = new Date();
+                const phoneNumber = $("#phone_number").val();
+                const address = $("#delivery_address").val();
+                const orderType = getOrderTypeFromStorage();
+                const orderTime = timestamp.toLocaleString('en-US', { 
+                    timeZone: 'Asia/Phnom_Penh', 
+                    year: 'numeric', 
+                    month: '2-digit', 
+                    day: '2-digit', 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    hour12: false 
+                }).replace(/(\d+)\/(\d+)\/(\d+), (\d+):(\d+)/, '$3-$1-$2 $4:$5');
+
+                // console.log(JSON.stringify(cartItems),tableNumber, orderTime, orderType)
+
+                $.ajax({
+                    url: '{% url "place_order" encrypted_table_number=encrypted_table_number table_number=table_number %}',
+                    method: 'POST',
+                    data: {
+                        'cart_items': JSON.stringify(cartItems),
+                        'table_number': tableNumber,
+                        'timestamp': orderTime,
+                        'order_type': orderType,
+                        'phone_number': phoneNumber,
+                        'delivery_address': address,
+                    },
+                    dataType: 'json',
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                    },
+                    success: function (data) {
+                        Swal.fire({
+                            title: 'Submit Order',
+                            text: 'Your order has been successfully placed.',
+                            icon: 'success',
+                            showCancelButton: false,
+                            confirmButtonText: 'Confirm',
+                            allowOutsideClick: false
+                        }).then(() => {
+                            // console.log('data:', data);
+                            const order_id = data.order_id;
+                            const order_number = data.order_number;
+                            const encrypted_table_number = data.encrypted_table_number;
+
+                            window.location.href = `/app_customer/${encrypted_table_number}/order_confirmation/${order_number}-${order_id}/`;
+                        });
+                    },
+                    error: function (xhr) {
+                        
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Failed to submit order, please try again later.',
+                            icon: 'error',
+                            showCancelButton: false,
+                            confirmButtonText: 'Confirm',
+                            allowOutsideClick: false
+                        }).then(() => {
+                            const encrypted_table_number = '{{encrypted_table_number}}';
+                            window.location.href = `/app_customer/${encrypted_table_number}`;
+                        });
+                    }
+                });
+            }
+
+            // Function to get the CSRF token from the cookie
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });
+        
+        function clearOrderType() {
+            try {
+                localStorage.removeItem('order_type');
+                showOrderTypeSelection();
+            } catch (e) {
+                console.error('Error clearing localStorage:', e);
+            }
+        }
+
+        function setOrderTypeInStorage(orderType) {
+            try {
+                localStorage.setItem('order_type', orderType);
+                return true;
+            } catch (e) {
+                console.error('Error setting localStorage:', e);
+                return false;
+            }
+        }
+
+
+        function showOrderTypeSelection() {
+            Swal.fire({
+                title: 'Select Order Type',
+                text: 'How would you like to receive your order?',
+                icon: 'question',
+                showCancelButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                confirmButtonText: 'Take Out',
+                showDenyButton: true,
+                denyButtonText: 'Delivery',
+                confirmButtonColor: '#28a745',
+                denyButtonColor: '#007bff'
+            }).then((result) => {
+                let orderType = result.isConfirmed ? 'take_out' : 'delivery';
+                setOrderType(orderType);
+            });
+        }
+
+        function setOrderType(orderType) {
+            if (setOrderTypeInStorage(orderType)) {
+                window.location.reload();
+            } else {
+                Swal.fire({
+                    title: 'Storage Error',
+                    text: 'Failed to save your selection. Please try again.',
+                    icon: 'error'
+                });
+            }
+        }
+
+        function initializeCartPage() {
+            const orderType = getOrderTypeFromStorage();
+            
+            if (!isValidOrderType(orderType)) {
+                // No order type set, redirect to index
+                Swal.fire({
+                    title: 'Order Type Required',
+                    text: 'Please select your order type first.',
+                    icon: 'warning',
+                    confirmButtonText: 'Select'
+                }).then(() => {
+                    clearOrderType();
+                });
+                return;
+            }
+            
+            // Update display
+            const orderTypeText = orderType === 'take_out' ? 'Take Out' : 'Delivery';
+            $('#cart-order-type').text(orderTypeText);
+            
+            // Show delivery address field if needed
+            if (orderType === 'delivery') {
+                $('#delivery-address-group').show();
+                $('#delivery_address').attr('required', true);
+            }
+        }
+
+        function getOrderTypeFromStorage() {
+            try {
+                return localStorage.getItem('order_type');
+            } catch (e) {
+                console.error('Error accessing localStorage:', e);
+                return null;
+            }
+        }
+
+        function isValidOrderType(orderType) {
+            return orderType === 'take_out' || orderType === 'delivery';
+        }
+    </script>
+    
+
+    <script>
+        $(document).ready(function () {
+
+            // AJAX function for updating item quantity
+            $('.quantity-dropdown').change(function () {
+                const item_id = $(this).data('item-id');
+                const cart_item_identifier = $(this).data('cart-item-identifier');
+                const new_quantity = $(this).val();
+
+                // Retrieve the CSRF token from the cookie
+                const csrftoken = getCookie('csrftoken');
+
+                // Set the CSRF token in the AJAX request header
+                $.ajax({
+                    url: '{% url "update_cart" encrypted_table_number=encrypted_table_number %}',
+                    method: 'POST',
+                    data: { 'cart_item_identifier': cart_item_identifier, 'quantity': new_quantity },
+                    dataType: 'json',
+                    headers: { 'X-CSRFToken': csrftoken }, // Set the CSRF token in the request header
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                    },
+                    success: function (data) {
+                        // console.log("item price total: ",data.item_total_price);
+                        // console.log("cart item identifier: ",data.cart_item_identifier);
+                        // console.log("total amount: ",data.total_amount);
+                        // Parse the item total price and total amount as floats
+                        const parsedItemTotalPrice = parseFloat(data.item_total_price);
+                        const parsedTotalAmount = parseFloat(data.total_amount);
+
+                        // Update the item total price in the HTML
+                        const itemTotalPriceElement = $(`.item-total-price[data-cart-item-identifier="${cart_item_identifier}"]`);
+                        itemTotalPriceElement.text(`$${parsedItemTotalPrice.toFixed(2)}`);
+
+                        // Update the total amount in the HTML
+                        const totalAmountElement = $('.total-amount');
+                        totalAmountElement.text(`$${parsedTotalAmount.toFixed(2)}`);
+                    },
+                    error: function (xhr) {
+                        console.log(xhr.responseText);
+                    }
+                });
+            });
+
+            // Function to get the CSRF token from the cookie
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });
+    </script>
+</body>
+{% include 'app_customer_interface/time_restriction.html' %}
+</html>

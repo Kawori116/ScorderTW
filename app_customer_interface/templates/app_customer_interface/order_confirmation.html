@@ -1,0 +1,89 @@
+<!-- app_customer_interface/templates/app_customer_interface/order_confirmation.html -->
+
+{% load static %}
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    {%include 'chead_top.html'%}
+    <link href="/static/assets/css/invoice.css?v=20250623" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    {%include 'loading.html'%}
+    <section>
+        <header>
+            <div class="container">
+                <div class="invoice_greeting"><h3>Thank You For Your Order!</h3></div>
+            </div>
+        </header>
+        <main>
+            <div class="container">
+                <div class="invoice_header">
+                    <div class="invoice_order-no"> <span>{{ order.order_number }}</span></div>
+                    <div class="invoice_table-no">
+                        {% if order.table_number != 000 %}
+                        Table No.:<span> #{{ order.table_number }}</span>
+                        {% else %}
+                           {{ order.get_order_type_display }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="invoice_detail">
+                    <ul class="invoice_detail-list">
+                        {% for order_item in order.orderitem_set.all %}
+                        <li class="invoice_detail-item">
+                            <div class="ordered_item-info">
+                                <div class="ordered_item-name">{{ order_item.dish.name }}</div>
+                                <div class="ordered_item-quantity">Quantity: <span>{{ order_item.quantity }}</span></div>
+                                <div class="ordered_item-uniprice">Price: <span>${{ order_item.dish.price }}</span></div>
+                                {% if order_item.dish.customization_available %}
+                                    {% if order_item.customization_details %}
+                                    <ul class="ordered_item-customization-list">
+                                        {% for line in order_item.customization_details|split_lines %}
+                                        <li>{{ line }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% endif %}
+                                    {% if order_item.extra_charges > 0 %}
+                                    <div class="ordered_item-extra-charge">Extra Charges: <span>${{ order_item.extra_charges }}</span></div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="ordered_item-total">
+                                ${{ order_item.item_total_price }}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% if order.table_number == 000 %}
+                        <div class="invoice_detail-contact">
+                            <p class="subtitle"><strong>Contact</strong></p>
+                            {% if order.order_type == 'delivery' %}
+                            <p><strong>Delivery Address: </strong>{{order.delivery_address}}</p>
+                            {% endif %}
+                            <p><strong>Phone Number: </strong>{{order.phone_number}}</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="invoice_detail-total">
+                    <div class="invoice_detail-total-txt">Total Amount</div>
+                    <div class="invoice_detail-total-amount">${{ order.total_amount }}</div>
+                </div>
+            </div>
+        </main>
+        <div class="container">
+            <div class="invoice-done-wrapper">
+                <a href="{% url 'index' encrypted_table_number=encrypted_table_number %}">
+                    <button class="bg-btn invoice-done-btn"><p>Back</p></button>
+                </a>
+            </div>
+        </div>
+    </section>
+    {%include 'footer.html'%}
+</body>
+
+</html>

@@ -1,0 +1,209 @@
+<!-- app_customer_interface/templates/app_customer_interface/home_page.html -->
+
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    {%include 'chead_top.html'%}
+    <style>
+        .sold-out {
+            background-color: #f2f2f2;
+            color: #888;
+        }
+    </style>
+    <link href="/static/assets/css/index.css?v=20250623" rel="stylesheet" type="text/css" />
+    <link rel="preload" href="/static/assets/images/banner.png" as="image">
+</head>
+
+<body>
+    {%include 'loading.html'%}
+    <section>
+        <header>
+            <div class="container">
+                <div class="hero-image"></div>
+                <h1 class="hero-heading">
+                    Welcome {{ restaurant.name }}!
+                    <span class="hero-table-no">
+                        {% if table_number != 000 %}
+                            Table No. #{{ table_number }}
+                        {% else %}
+                            <span id="order-type-display"></span>
+                            <a href="javascript:void(0);" id="change-order-type">
+                                Change
+                            </a>
+                        {% endif %}
+                    </span>
+                </h1>
+                <p class="hero-paragraph">{{ restaurant.other_details }}</p>
+            </div>
+        </header>
+        <hr>
+        <main>
+            <div class="container">
+                <h2 class="menu_category-heading">Menu Categories</h2>
+                <ul class="menu_category-list">
+                    {% for category in menu_categories %}
+                        <li class="menu_category-list-item"><a href="#{{ category.name }}">{{ category.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <hr>
+            {% for category in menu_categories %}
+                <div class="container">
+                    <h2 class="menu_dish-category-heading" id="{{ category.name }}">{{ category.name }}</h2>
+                    <ul class="menu_dish-list">
+                        {% for dish in dishes %}
+                            {% if dish.category == category %}
+                                {% if not dish.is_sold_out %}
+                                    <li class="menu_dish-list-item {% if dish.is_sold_out %}sold-out{% endif %}">
+                                        <a href="{% url 'item_details' encrypted_table_number=encrypted_table_number dish_id=dish.dish_id %}">
+                                            <div class="menu_dish-img">
+                                                <div class="menu_dish-img-wrap">
+                                                    <img src="{% if dish.image_1x1 %}{{ dish.image_1x1.url }}{% else %}/static/assets/images/no-image.png{% endif %}" 
+                                                    alt="{{ dish.name }} Image" 
+                                                    loading="lazy">
+                                                </div>
+                                            </div>
+                                            <div class="menu_dish-item-group">
+                                                <div class="menu_dish-details">
+                                                    <h4 class="menu_dish-heading">{{ dish.name }}</h4>
+                                                    <!-- <div class="menu_dish-description"></div> -->
+                                                    <div class="menu_dish-price">${{ dish.price }}</div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li class="menu_dish-list-item {% if dish.is_sold_out %}sold-out{% endif %}">
+                                        <a href="javascript:void(0)">
+                                            <div class="menu_dish-img">
+                                                <div class="menu_dish-img-wrap">
+                                                    <img src="{% if dish.image_1x1 %}{{ dish.image_1x1.url }}{% else %}/static/assets/images/no-image.png{% endif %}" 
+                                                    alt="{{ dish.name }} Image" 
+                                                    loading="lazy">
+                                                </div>
+                                            </div>
+                                            <div class="menu_dish-item-group">
+                                                <div class="menu_dish-details">
+                                                    <h4 class="menu_dish-heading">{{ dish.name }}</h4>
+                                                    <span class="sold-out-label">Sold Out</span>
+                                                    <!-- <div class="menu_dish-description">{{ dish.description }}</div> -->
+                                                    <div class="menu_dish-price">${{ dish.price }}</div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+            <div class="add-cart-wrapper">
+                <a href="{% url 'cart_page' encrypted_table_number=encrypted_table_number %}">
+                    <button class="bg-btn add-cart-btn"><p>Cart</p></button>
+                </a>
+            </div>
+        </main>
+    </section>
+    {%include 'footer.html'%}
+    <script>
+    $(document).ready(function() {
+        const orderType = "{{ order_type }}"
+        if(orderType !== 'eat_in'){
+            checkAndShowOrderTypeSelection();
+            $('#change-order-type').css('display', 'block');
+        }
+    });
+
+    function checkAndShowOrderTypeSelection() {
+        const orderType = getOrderTypeFromStorage();
+        
+        if (!isValidOrderType(orderType)) {
+            showOrderTypeSelection();
+        } else {
+            updateOrderTypeDisplay(orderType);
+        }
+    }
+
+    function isValidOrderType(orderType) {
+        return orderType === 'take_out' || orderType === 'delivery';
+    }
+
+    function getOrderTypeFromStorage() {
+        try {
+            return localStorage.getItem('order_type');
+        } catch (e) {
+            console.error('Error accessing localStorage:', e);
+            return null;
+        }
+    }
+
+    function setOrderTypeInStorage(orderType) {
+        try {
+            localStorage.setItem('order_type', orderType);
+            return true;
+        } catch (e) {
+            console.error('Error setting localStorage:', e);
+            return false;
+        }
+    }
+
+    function showOrderTypeSelection() {
+        Swal.fire({
+            title: 'Select Order Type',
+            text: 'How would you like to receive your order?',
+            icon: 'question',
+            showCancelButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            confirmButtonText: 'Take Out',
+            showDenyButton: true,
+            denyButtonText: 'Delivery',
+            confirmButtonColor: '#28a745',
+            denyButtonColor: '#007bff'
+        }).then((result) => {
+            let orderType = result.isConfirmed ? 'take_out' : 'delivery';
+            setOrderType(orderType);
+        });
+    }
+
+    function setOrderType(orderType) {
+        if (setOrderTypeInStorage(orderType)) {
+            updateOrderTypeDisplay(orderType);
+        } else {
+            Swal.fire({
+                title: 'Storage Error',
+                text: 'Failed to save your selection. Please try again.',
+                icon: 'error'
+            });
+        }
+    }
+
+    function updateOrderTypeDisplay(orderType) {
+        const displayText = orderType === 'take_out' ? 'Take Out' : 'Delivery';
+        $('#order-type-display').text(displayText);
+        $('#change-order-type').show();
+    }
+
+    $('#change-order-type').click(function() {
+          clearOrderType();
+    });
+
+    function clearOrderType() {
+        try {
+            localStorage.removeItem('order_type');
+            $('#order-type-display').text('');
+            $('#change-order-type').hide();
+            showOrderTypeSelection();
+        } catch (e) {
+            console.error('Error clearing localStorage:', e);
+        }
+    }
+    </script>
+</body>
+
+{% include 'app_customer_interface/time_restriction.html' %}
+
+</html>

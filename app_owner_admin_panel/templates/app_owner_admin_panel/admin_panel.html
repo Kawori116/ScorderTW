@@ -1,0 +1,142 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    {%include 'head_top.html'%}
+    <link href="/static/assets/css/loading.css" rel="stylesheet" type="text/css" />
+    <link href="/static/assets/css/tool/sweetalert2.min.css" rel="stylesheet" type="text/css" />
+    <link href="/static/assets/css/owner_panel.css?v=20240810" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+    {%include 'navbar_owner.html'%}
+    <section>
+        <div class="container">
+            <div class="row justify-content-md-center">
+                <div class="col-md-12 col-xs-12">
+                    <h3 id="title-text">Welcome, {{ restaurant.name }}!</h3>
+                    <hr />
+                    <div class="profile-details">
+                        <div class="restaurant-info intro-info">
+                            <h4>Restaurant Details</h4>
+                            <div class="restaurant-intro">
+                                <div class="restaurant-name">
+                                    <p>Name:</p>
+                                    <span>{{ restaurant.name }}</span>
+                                </div>
+                                <div class="restaurant-address">
+                                    <p>Address:</p>
+                                    <span>{{ restaurant.address }}</span>
+                                </div>
+                                <div class="restaurant-contact">
+                                    <p>Contact:</p>
+                                    <span>{{ restaurant.contact }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="restaurant-info detail-info">
+                            <h4>Remarks</h4>
+                            <div class="other-details">{{ restaurant.other_details }}</div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="accounting">
+                        <div id="today-date"></div>
+                        <button id="todays-checkout">Today's Checkout</button>
+                    </div>
+                    <table id="orders-table" class="display">
+                        <thead>
+                            <tr>
+                                <th>Order Number</th>
+                                <th>Total Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td class="order-number">{{ order.order_number }}</td>
+                                <td><span>$</span> {{order.total_amount}}</td>
+                                <td>
+                                    <div
+                                        class="order-status {% if order.status == 'placed' %}status-placed {% elif order.status == 'processing' %}status-processing {% elif order.status == 'confirmed' %}status-confirmed {% elif order.status == 'canceled' %}status-canceled {% elif order.status == 'completed' %}status-completed {% endif %}">
+                                        {{ order.status }}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+    {%include 'footer.html'%}
+
+    <script>
+        $(document).ready(function () {
+            initializeDataTable("#orders-table", []);
+        });
+
+        var today = new Date();
+        var date =
+            today.getDate() +
+            "/" +
+            (today.getMonth() + 1) +
+            "/" +
+            today.getFullYear();
+
+        $("#today-date").text(date);
+
+        $("#todays-checkout").click(function () {
+            const csrftoken = getCookie("csrftoken");
+            $.ajax({
+                url: '{% url "get_total_amount" %}',
+                method: "POST",
+                dataType: "json",
+                headers: {
+                    "X-CSRFToken": csrftoken
+                },
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+                },
+                success: function (response) {
+                    Swal.fire({
+                        title: "Total Amount",
+                        text: "Today's Total Amount: " + response.total_amount,
+                        icon: "info",
+                    });
+                },
+                error: function (error) {
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Something went wrong!",
+                        icon: "error",
+                    });
+                },
+            });
+        });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === name + "=") {
+                        cookieValue = decodeURIComponent(
+                            cookie.substring(name.length + 1)
+                        );
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+
+</html>

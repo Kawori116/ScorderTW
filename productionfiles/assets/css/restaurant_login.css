@@ -1,0 +1,103 @@
+html {
+    height: 100vh;
+}
+
+body {
+    background: linear-gradient(0deg, rgba(57, 57, 57, 0.5), rgba(57, 57, 57, 0.6)), url("../images/login-cover.jpg") no-repeat fixed center center;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+}
+
+section {
+    min-height: initial;
+}
+
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-form,
+.login-alert {
+    padding: 1rem;
+    width: 50%;
+    max-width: 500px;
+    margin: 0 auto;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, .2);
+    background-color: white;
+}
+
+.login-form {
+    border-top: 7px solid teal;
+}
+
+.login-alert {
+    color: teal;
+    border-bottom: 7px solid teal;
+}
+
+h2 {
+    text-align: center;
+    color: black;
+    text-transform: uppercase;
+    margin-bottom: 1em;
+}
+
+.input-wrapper {
+    display: flex;
+    border: 1px solid #e6e6e6;
+    padding: 1em;
+    border-radius: 5px;
+}
+
+.input-wrapper input {
+    outline: none;
+    width: 100%;
+    line-height: 1.5;
+    border: none;
+    background-color: white;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 1.25rem;
+    color: white;
+    background-color: teal;
+}
+
+.login-wrapper {
+    margin-bottom: 1em;
+}
+
+@media screen and (max-width: 768px) {
+
+    .login-form,
+    .login-alert {
+        min-width: 320px;
+    }
+
+}
+
+@media screen and (max-width:376px) {
+
+    .login-form,
+    .login-alert {
+        min-width: 250px;
+    }
+
+    .input-wrapper {
+        padding: 0.8em;
+    }
+
+    .login-btn {
+        padding: 0.55rem;
+        font-size: 1rem;
+    }
+}

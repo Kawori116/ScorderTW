@@ -1,0 +1,175 @@
+.menu-item-header,
+#menu-item-table .menu-item-list {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.menu-item-header .add-btn {
+    background-color: var(--accent);
+    color: var(--white);
+    padding: .5em 2em;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.menu-item-header .add-btn:focus {
+    box-shadow: none !important;
+}
+
+#menu-item-table th:last-child,
+td:last-child {
+    border-radius: var(--border-radius);
+}
+
+table.dataTable>tbody>tr {
+    border-radius: var(--border-radius);
+}
+
+#menu-item-table .menu-item-list {
+    background-color: var(--white);
+}
+
+#menu-item-table tbody>tr {
+    background-color: transparent;
+}
+
+#menu-item-table .menu-item-list p {
+    margin: 0;
+}
+
+
+#menu-item-table .menu-item-list .menu-item-name {
+    display: flex;
+    gap: 1em;
+}
+
+#menu-item-table .menu-item-list .custom-icon {
+    background-color: var(--yellow);
+    color: var(--white);
+    font-weight: 600;
+    font-size: .8em;
+    padding: .3em .8em;
+    border-radius: 30px;
+}
+
+/* edit menu-item */
+.dish-subheader {
+    display: flex;
+    gap: 1em;
+    align-items: center;
+}
+
+.dish-subheader p {
+    margin: 0;
+    color: var(--dark-grey);
+}
+
+.dish-subheader p::before {
+    content: '';
+    border-left: solid 1px var(--dark-grey);
+    padding-left: 1em;
+}
+
+#previewBtn1x1 ,#previewBtn16x9 {
+   color: var(--accent);
+   font-weight: 700;
+   margin: .5em ;
+   cursor: pointer;
+}
+
+.preview-container {
+    max-width: 300px;
+    display: none;
+    margin: 1em 0;
+}
+
+.preview-container img {
+    width: 100%;
+    transform: scale(1);
+}
+
+/* customizable */
+.customization-groups .remove-category-group {
+    color: var(--red);
+    box-shadow: none;
+}
+
+.options-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.customization-options {
+    padding: 1em;
+    flex: 1 1 calc(33.33% - 20px);
+    min-width: 200px;
+    border: solid 2px var(--white);
+    box-shadow: var(--box-shadow-light);
+    border-radius: var(--border-radius);
+}
+
+.customization-option {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.customization-groups .customizable-title {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: .5em 1em;
+    background-color: var(--accent);
+    border-radius: var(--border-radius);
+    margin: 1em 0;
+    font-weight: 600;
+}
+
+.customizable-title h4 {
+    color: var(--white);
+    margin: 0;
+}
+
+.customization-option .option-count {
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 1em;
+    border-left: solid 4px var(--accent);
+    padding: .2em 0 .2em 1em;
+}
+
+.btn-wrap .remove-option {
+    background-color: var(--red);
+    color: var(--white);
+}
+
+.add-btn-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1em 0;
+}
+
+.add-btn-wrap hr {
+    width: calc(100%/2 - 2em);
+}
+
+.add-btn-wrap .add-option,
+.btn-wrap button.add-category-group {
+    background-color: var(--dark-grey);
+    color: var(--white);
+    transition: .5s;
+    border-radius: var(--border-radius);
+    margin: 0 1em;
+}
+
+.add-btn-wrap .add-option:hover,
+.btn-wrap button.add-category-group:hover {
+    box-shadow: none;
+    border: solid 1px var(--dark-grey);
+    background-color: var(--white);
+    color: var(--dark-grey);
+}

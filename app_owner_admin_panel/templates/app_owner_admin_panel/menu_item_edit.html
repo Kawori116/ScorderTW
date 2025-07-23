@@ -1,0 +1,512 @@
+
+{% load static %}
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    {%include 'head_top.html'%}
+    <link href="/static/assets/css/dish.css?v=20250413" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    {%include 'navbar_owner.html'%}
+    <section>
+        <div class="container">
+            <div class="row justify-content-md-center">
+                <div class="col-md-12 col-xs-12">
+                    <div class="dish-subheader">
+                        <a href="{% url 'menu_items' %}">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <h3 id="title-text">Dish</h3>
+                        </a>
+                        <p>Edit</p>
+                    </div>
+                    <form method="post" action="{% url 'update_dish' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="input-wrapper">
+                            <!-- Select Category for the Menu Item -->
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-3">
+                                    <label for="category" class="form-label">Category</label>
+                                </div>
+                                <div class="col-12 col-md-9">
+                                    <div class="input-group">
+                                        <select id="category" name="category" class="form-control">
+                                            {% for category in menu_categories %}
+                                            <option value="{{ category.category_id }}" {% if dish.category.category_id == category.category_id  %} selected {% endif %}>{{ category.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Menu Item Name -->
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-3">
+                                    <label for="name" class="form-label">Menu Item Name</label>
+                                </div>
+                                <div class="col-12 col-md-9">
+                                    <div class="input-group">
+                                        <input type="text" id="name" name="name" class="form-control"  value="{{ dish.name }}" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Menu Item Price -->
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-3">
+                                    <label for="price" class="form-label">Price</label>
+                                </div>
+                                <div class="col-12 col-md-9">
+                                    <div class="input-group">
+                                        <input type="number" id="price" name="price" class="form-control"  value="{{ dish.price }}"required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Menu Item Description -->
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-3">
+                                    <label for="description" class="form-label">Description</label>
+                                </div>
+                                <div class="col-12 col-md-9">
+                                    <div class="input-group">
+                                        <textarea id="description" name="description" class="form-control" rows="4">{{ dish.description }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Dish Image 1x1 -->
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-3">
+                                    <label for="image_1x1" class="form-label">Dish Image (1x1)</label>
+                                </div>
+                                <div class="col-12 col-md-9">
+                                    <div class="custom-file mb-3">
+                                        <input type="file" id="image_1x1" name="image_1x1" class="form-control" accept="image/*">
+                                        <label class="custom-file-label" for="image_1x1">Choose file...</label>
+                                    </div>
+                                    <small class="form-text text-muted">Must be 1x1 ratio, above 2MB (larger files will be compressed).</small>
+                                    <div>
+                                        <div id="previewBtn1x1">Preview</div>
+                                        <div class="preview-container">
+                                            <img id="preview-img-1x1" src="{% if dish.image_1x1 %}{{ dish.image_1x1.url }}{% else %}/static/assets/images/no-image.png{% endif %}" alt="1x1 Image" class="preview-img" data-has-image="{% if dish.image_1x1 %}true{% else %}false{% endif %}" style="max-width: 200px;" loading="lazy">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Dish Image 16x9 -->
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-3">
+                                    <label for="image_16x9" class="form-label">Dish Image (16x9)</label>
+                                </div>
+                                <div class="col-12 col-md-9">
+                                    <div class="custom-file mb-3">
+                                        <input type="file" id="image_16x9" name="image_16x9" class="form-control" accept="image/*">
+                                        <label class="custom-file-label" for="image_16x9">Choose file...</label>
+                                    </div>
+                                    <small class="form-text text-muted">Must be 16x9 ratio, above 2MB (larger files will be compressed).</small>
+                                    <div>
+                                        <div id="previewBtn16x9">Preview</div>
+                                        <div class="preview-container">
+                                            <img id="preview-img-16x9" src="{% if dish.image_16x9 %}{{ dish.image_16x9.url }}{% else %}/static/assets/images/no-image.png{% endif %}" class="preview-img" alt="16x9 Image" data-has-image="{% if dish.image_16x9 %}true{% else %}false{% endif %}"style="max-width: 200px;" loading="lazy">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Customization Checkbox -->
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-3">
+                                    <label for="customizable" class="form-label">Is Customizable</label>
+                                </div>
+                                <div class="col-12 col-md-9">
+                                    <div class="input-group">
+                                        <label>
+                                            <input type="checkbox" id="customizable" name="customizable" {% if dish.customization_available %}checked{% endif %}>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="customization-groups-wrapper" style="display: none;">
+                                {% for customization_category in customization_categories %}
+                                <div class="customization-groups">
+                                    <div class="customization-category-group">
+                                        <div class="customizable-title">
+                                            <h4>Customization Group</h4>
+                                            <!-- Remove Category Group Button -->
+                                            <button type="button" class="btn remove-category-group"><i class="fa-solid fa-trash-can"></i></button>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-12 col-md-3">
+                                                <label for="customization-category-name" class="form-label">Category Name</label>                                                
+                                            </div>
+                                            <div class="col-12 col-md-9">
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control customization-category-name" name="customization_category_name[{{ forloop.counter0 }}]" placeholder="Category Name" value="{{customization_category.name}}" required>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-12 col-md-3">
+                                                <label for="max-options" class="form-label">Max Options</label>
+                                            </div>
+                                            <div class="col-12 col-md-9">
+                                                <div class="input-group">
+                                                    <select class="form-control max-options" name="max_options[{{ forloop.counter0 }}]">
+                                                        {% for i in 10|make_range %}
+                                                        <option value="{{ i }}" {% if i == customization_category.max_selection %} selected {% endif %}>{{ i }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="options-container">
+                                            {% for option in customization_category.options %}
+                                            
+                                            <!-- Customization Options -->
+                                            <div class="customization-options col-md-4">
+                                                <div class="customization-option">
+                                                    <div class="option-count">Option</div>
+                                                    <div class="row mb-3">
+                                                        <div class="col-12 col-md-3">
+                                                            <label for="customization-option-name" class="form-label">Name</label>
+                                                        </div>
+                                                        <div class="col-12 col-md-9">
+                                                            <div class="input-group">
+                                                                <input type="text" class="form-control customization-option-name" name="customization_option_name[{{ forloop.parentloop.counter0 }}][{{ forloop.counter0 }}]" value="{{ option.name }}" required>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-3">
+                                                        <div class="col-12 col-md-3">
+                                                            <label for="customization-option-price" class="form-label">Extra Price</label>
+                                                        </div>
+                                                        <div class="col-12 col-md-9">
+                                                            <div class="input-group">
+                                                                <input type="number" class="form-control customization-option-price" name="customization_option_price[{{ forloop.parentloop.counter0 }}][{{ forloop.counter0 }}]" value="{{ option.price }}" step="0.01">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="btn-wrap pr-0">
+                                                        <button type="button" class="btn remove-option"><i class="fa-solid fa-trash-can"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        
+                                            {% endfor %}
+                                        </div>
+                                        <!-- Add Option Button -->
+                                        <div class="add-btn-wrap">
+                                            <hr>
+                                            <button type="button" class="btn add-option"><i class="fa-solid fa-plus"></i></button>
+                                            <hr>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <hr class="px-2">
+                        <div class="btn-wrap">
+                                <!-- Add Category Group Button -->
+                            <button type="button" class="btn add-category-group" id="add-category-group">Customization Category<i class="ml-2 fa-solid fa-plus"></i></button>
+
+                            <button class="btn save-btn" onclick="setDishID('{{ dish.pk }}')">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    {%include 'footer.html'%}
+</body>
+<script>
+    function setDishID(dishId) {
+        document.cookie = "dish_id=" + dishId + "; path=/";
+    }
+
+    function updateOptionCount() {
+        $('.customization-category-group').each(function (index, categoryGroup) {
+            $(categoryGroup).find('.customization-option').each(function (optionIndex, option) {
+                var optionId = 'option-' + index + '-' + optionIndex;
+                $(option).attr('id', optionId); // Assign a unique ID to each option
+                $(option).find('.option-count').text('Option ' + optionIndex);
+
+                $(option).find('.customization-option-name').attr('id', optionId + '-name');
+                $(option).find('.customization-option-name').attr('name', 'customization_option_name[' + index + '][' + optionIndex + ']');
+                $(option).find('.customization-option-price').attr('id', optionId + '-price');
+                $(option).find('.customization-option-price').attr('name', 'customization_option_price[' + index + '][' + optionIndex + ']');
+            });
+        });
+    }
+
+    function updateGroupCount() {
+        $('.customization-groups').each(function (groupIndex, categoryGroup) {
+            var groupId = 'customization-group-' + groupIndex;
+            $(categoryGroup).attr('id', groupId);
+            $(categoryGroup).find('.customizable-title h4').text('Customization Group ' + groupIndex);
+            $(categoryGroup).find('.customization-category-name').attr('name', 'customization_category_name['+groupIndex+']');
+            $(categoryGroup).find('.max-options').attr('name', 'max_options['+groupIndex+']');
+        });
+
+        updateOptionCount();
+    }
+    
+    function addCategoryGroup(){
+        const lastcategoryGroup = $('.customization-groups').last();
+        const categoryGroup = lastcategoryGroup.find('.customization-category-group');
+        const categoryIndex = $('.customization-category-group').index(categoryGroup) + 1;
+
+        const nextCategoryId = 'category-group-' + categoryIndex;
+        
+        const categoryGroupHtml = `
+            <div class="customization-groups" id="${nextCategoryId}"}>
+                <div class="customization-category-group">
+                    <div class="customizable-title">
+                        <h4>Customization Group ${categoryIndex + 1}</h4>
+                        <button type="button" class="btn remove-category-group"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-3">
+                            <label for="customization_category_name[${categoryIndex}]" class="form-label">Category Name</label>                                                
+                        </div>
+                        <div class="col-12 col-md-9">
+                            <div class="input-group">
+                                <input type="text" class="form-control customization-category-name" name="customization_category_name[${categoryIndex}]" placeholder="Category Name" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-3">
+                            <label for="max-options" class="form-label">Max Options</label>
+                        </div>
+                        <div class="col-12 col-md-9">
+                            <div class="input-group">
+                                <select class="form-control max-options" name="max_options[${categoryIndex}]">
+                                    {% for i in 10|make_range %}
+                                    <option value="{{ i }}">{{ i }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="options-container">
+                        <div class="customization-options">
+                            <div class="customization-option" id="option-${categoryIndex}-0">
+                                <div class="option-count">Option 1</div>
+                                <div class="row mb-3">
+                                    <div class="col-12 col-md-3">
+                                        <label for="option-${categoryIndex}-0-name" class="form-label">Name</label>
+                                    </div>
+                                    <div class="col-12 col-md-9">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control customization-option-name" id="option-${categoryIndex}-0-name" name="customization_option_name[${categoryIndex}][0]" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-12 col-md-3">
+                                        <label for="option-${categoryIndex}-0-price" class="form-label">Extra Price</label>
+                                    </div>
+                                    <div class="col-12 col-md-9">
+                                        <div class="input-group">
+                                            <input type="number" class="form-control customization-option-price" id="option-${categoryIndex}-0-price" name="customization_option_price[${categoryIndex}][0]" value="0" step="0.01">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="btn-wrap pr-0">
+                                    <button type="button" class="btn remove-option"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="add-btn-wrap">
+                            <hr>
+                            <button type="button" class="btn add-option" data-category-group="${categoryIndex}"><i class="fa-solid fa-plus"></i></button>
+                            <hr>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            
+        $('.customization-groups-wrapper').append(categoryGroupHtml);
+    }
+
+    $(document).ready(function () {
+
+        $('#previewBtn1x1, #previewBtn16x9').on('click', function() {
+            $(this).siblings('.preview-container').slideToggle();
+        });
+
+        $('.preview-container .preview-img').each(function () {
+            if ($(this).data('has-image') === true || $(this).data('has-image') === 'true') {
+                $(this).closest('.preview-container').slideDown();
+            }
+        });
+
+        let selectedFile1x1 = null;
+        let selectedFile16x9 = null;
+
+        $('#image_1x1').on('change', function(e) {
+            selectedFile1x1 = e.target.files[0];
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#preview-img-1x1').attr('src', e.target.result);
+                $('#previewBtn1x1').siblings('.preview-container').slideDown();
+            };
+            reader.readAsDataURL(selectedFile1x1);
+        });
+
+        $('#image_16x9').on('change', function(e) {
+            selectedFile16x9 = e.target.files[0];
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#preview-img-16x9').attr('src', e.target.result);
+                $('#previewBtn16x9').siblings('.preview-container').slideDown();
+            };
+            reader.readAsDataURL(selectedFile16x9);
+        });
+
+        $('#image_1x1, #image_16x9').on('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const maxSize = 2 * 1024 * 1024; // 2MB
+                if (file.size > maxSize) {
+                    alert('File must be <2MB. Larger files will be compressed and quality downgraded.');
+                }
+            }
+        });
+
+        $('form').on('submit', function(e) {
+            let isValid = true;
+            if ($('#customizable').is(':checked')) {
+                var categoryGroupCount = $('.customization-groups').length;
+
+                if (categoryGroupCount === 0) {
+                    alert('You must add at least one customization category group if the dish is customizable.');
+                    isValid = false;
+                    return false;
+                }
+            }
+
+            $('.customization-category-group').each(function(index, categoryGroup) {
+                let maxOptions = parseInt($(categoryGroup).find('.max-options').val()); 
+                let optionCount = $(categoryGroup).find('.customization-option').length;
+
+                if (optionCount < maxOptions) {
+                    isValid = false;
+                    alert(`Category ${index} must have at least ${maxOptions} customization options!`);
+                    return false;
+                }
+            });
+
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+        updateGroupCount();
+        
+        if ($('#customizable').is(':checked')) {
+            $('.customization-groups').show();
+            $('#add-category-group').show();
+            $('.customization-groups-wrapper').show();
+        } else {
+            $('.customization-groups').hide();
+            $('#add-category-group').hide();
+            $('.customization-groups-wrapper').hide();
+        }
+        
+        $('#customizable').change(function () {
+            if ($(this).is(':checked')) {
+                if($('.customization-groups').length == 0){
+                    addCategoryGroup();
+                    updateGroupCount();
+                }
+                $('.customization-groups').show();
+                $('#add-category-group').show();
+                $('.customization-groups-wrapper').show();
+            } else {
+                $('.customization-groups').remove();
+                $('#add-category-group').hide(); 
+                $('.customization-groups-wrapper').hide();
+            }
+        });
+
+        // Add a new customization option based on the last option in the group
+        $(document).on('click', '.add-option', function () {
+            var categoryGroup = $(this).closest('.customization-category-group');
+            var lastOption = categoryGroup.find('.customization-options').last();
+            var categoryIndex = $('.customization-category-group').index(categoryGroup);
+            var optionCount = categoryGroup.find('.customization-option').length;
+            var nextOptionId = `option-${categoryIndex}-${optionCount}`;
+
+            var optionHtml = `
+            <div class="customization-options">
+                    <div class="customization-option" id="${nextOptionId}">
+                        <div class="option-count">Option ${optionCount +1}</div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-md-3">
+                                <label for="${nextOptionId}-name" class="form-label">Name</label>
+                            </div>
+                            <div class="col-12 col-md-9">
+                                <div class="input-group">
+                                    <input type="text" class="form-control customization-option-name" id="${nextOptionId}-name" name="customization_option_name[${categoryIndex}][${optionCount}]" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-md-3">
+                                <label for="${nextOptionId}-price" class="form-label">Extra Price</label>
+                            </div>
+                            <div class="col-12 col-md-9">
+                                <div class="input-group">
+                                    <input type="number" class="form-control customization-option-price" id="${nextOptionId}-price" name="customization_option_price[${categoryIndex}][${optionCount}]" value="0" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="btn-wrap pr-0">
+                            <button type="button" class="btn remove-option"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                </div>
+            </div>`;
+            lastOption.after(optionHtml);
+            updateOptionCount();
+        });
+
+
+         // Prevent removing the last option in the group
+        $(document).on('click', '.remove-option', function () {
+            var categoryGroup = $(this).closest('.customization-category-group');
+            var options = categoryGroup.find('.customization-option');
+
+            if (options.length > 1) {
+                $(this).closest('.customization-options').remove();
+                updateOptionCount();
+            } else {
+                alert("Each customization group must have at least one option.");
+            }
+        });
+    
+        $(document).on('click', '#add-category-group', function () {
+            addCategoryGroup();
+            updateGroupCount();
+        });
+
+        $(document).on('click', '.remove-category-group', function () {
+            var categoryGroups = $('.customization-category-group');
+            if (categoryGroups.length > 1) {
+                $(this).closest('.customization-groups').remove();
+                updateGroupCount();
+            } else {
+                alert("At least one customization category group is required.");
+            }
+        });
+
+    });
+
+</script>
+</html>

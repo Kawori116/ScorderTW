@@ -1,0 +1,33 @@
+table.dataTable>tbody>tr{
+    background-color: white;
+}
+
+table.dataTable>tbody>tr:nth-child(2n){
+    background-color: white;
+}
+
+table.dataTable>tbody>tr.even>*{
+    box-shadow: none;
+}
+
+div.dataTables_wrapper div.dataTables_length select{
+    min-width: 7em;
+    color: teal;
+    cursor: pointer;
+}
+
+div.dataTables_wrapper div.dataTables_length select, div.dataTables_wrapper div.dataTables_filter input{
+    border: 1px solid #e6e6e6;
+    padding: 0.5em 1.5em;
+    border-radius: 5px;
+    outline: none;
+    line-height: 1.5;
+    background-color: white;
+    margin-bottom: 1em;
+}
+
+.row.grid-x{
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}

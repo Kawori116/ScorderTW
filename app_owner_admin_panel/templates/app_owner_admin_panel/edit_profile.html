@@ -1,0 +1,73 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    {%include 'head_top.html'%}
+    <link href="/static/assets/css/loading.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    {%include 'navbar_owner.html'%}
+    <section>
+        <div class="container">
+            <div class="row justify-content-md-center">
+                <div class="col-md-12 col-xs-12">
+                    <h3 id="title-text">Restaurant Profile</h3>
+                    <hr />
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="input-wrapper">
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-3">
+                                    <label for="name" class="form-label">Name</label>
+                                </div>
+                                <div class="col-12 col-md-9">
+                                    <div class="input-group">
+                                        <input type="text" id="name" name="name" class="form-control" value="{{ restaurant.name }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-3">
+                                    <label for="address" class="form-label">Address</label>
+                                </div>
+                                <div class="col-12 col-md-9">
+                                    <div class="input-group">
+                                        <input type="text" id="address" name="address" class="form-control" value="{{ restaurant.address }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-3">
+                                    <label for="contact" class="form-label">Contact</label>
+                                </div>
+                                <div class="col-12 col-md-9">
+                                    <div class="input-group">
+                                        <input type="text" id="contact" name="contact" class="form-control" value="{{ restaurant.contact }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-12 col-md-3">
+                                    <label for="other_details" class="form-label">Description</label>
+                                </div>
+                                <div class="col-12 col-md-9">
+                                    <div class="input-group">
+                                        <textarea id="other_details" name="other_details" class="form-control" rows="4" required>{{ restaurant.other_details }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="btn-wrap">
+                            <button type="submit" class="btn save-btn">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    {%include 'footer.html'%}
+</body>
+</html>

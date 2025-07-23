@@ -1,0 +1,84 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    {%include 'head_top.html'%}
+    <link href="/static/assets/css/category.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    {%include 'navbar_owner.html'%}
+    <section>
+        <div class="container">
+            <div class="row justify-content-md-center">
+                <div class="col-md-12 col-xs-12">
+                    <div class="category-header">
+                        <h3 id="title-text">Category</h3>
+                        <a href="{% url 'add_category_page'%}" class="btn add-btn">Add +</a>
+                    </div>
+                    <hr class="mt-0"/>
+                    <table id="cate-table" class="display">
+                        <thead>
+                            <tr>
+                                <th>Category Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category in menu_categories %}
+                            <tr>
+                                <td class="category-list">
+                                    <p>{{ category.name }}</p>
+                                    <div class="action-wrap">
+                                        <a href="{% url 'edit_category' category.category_id %}" class="edit-btn">
+                                            <div class="icon-wrap">
+                                                <i class="fas fa-pen"></i>
+                                            </div>
+                                        </a>
+                                        <form id="delete-category-{{ category.category_id }}" action="{% url 'delete_category' category.category_id %}" method="POST" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="button" class="delete-btn" onclick="confirmDelete('{{ category.category_id }}', '{{ category.name }}')">
+                                                <div class="icon-wrap">
+                                                    <i class="fas fa-trash"></i>
+                                                </div>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+    {%include 'footer.html'%}
+
+    <script>
+
+        $(document).ready(function () {
+            initializeDataTable("#cate-table", []);
+        });
+        
+        function confirmDelete(categoryId, categoryName) {
+            Swal.fire({
+                title: `Are you sure to delete ${categoryName}?`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "var(--red)",
+                cancelButtonColor: "var(--light-grey)",
+                confirmButtonText: "Delete",
+                cancelButtonText: "Cancel",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $(`#delete-category-${categoryId}`).submit();
+                 
+                }
+            });
+        }
+    </script>
+    
+</body>
+</html>

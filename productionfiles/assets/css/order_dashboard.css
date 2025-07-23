@@ -1,0 +1,68 @@
+/* todays accounting */
+.accounting {
+    display: flex;
+    align-items: center;
+    padding: 0.7em;
+    background-color: var(--accent);
+    color: var(--white);
+    border-radius: var(--border-radius);
+    margin-bottom: 0.5em;
+}
+
+.accounting #today-date {
+    margin-right: 1em;
+}
+
+.accounting #todays-checkout {
+    padding: 0.5em 1em;
+    background-color: var(--white);
+    color: var(--accent);
+    border: solid 1px transparent;
+    border-radius: var(--border-radius);
+    transition: .3s;
+    cursor: pointer;
+}
+
+.accounting #todays-checkout:hover {
+    color: var(--black);
+}
+
+/* table style */
+.order-number {
+    color: var(--accent);
+}
+
+.dish-list {
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+}
+
+.dish-list .dish-item::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: .5em;
+    border-radius: 50%;
+}
+
+.dish-item[data-status="completed"]::before {
+    background-color: rgb(104, 185, 132);
+}
+
+.dish-item[data-status="placed"]::before {
+    background-color: rgb(244, 157, 26);
+}
+
+.dish-item[data-status="canceled"]::before {
+    background-color: rgb(255, 102, 102);
+}
+
+.dish-item[data-status="processing"]::before {
+    background-color: rgb(157, 118, 193);
+}
+
+.dish-item[data-status="confirmed"]::before {
+    background-color: rgb(57, 167, 255);
+}

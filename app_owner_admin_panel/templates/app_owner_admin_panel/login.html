@@ -1,0 +1,39 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    {%include 'head_top.html'%}
+    <link href="/static/assets/css/style.css" rel="stylesheet" type="text/css" />
+    <link href="/static/assets/css/restaurant_login.css" rel="stylesheet" type="text/css" />
+    <title>Ordering System</title>
+</head>
+<body>
+    <section>
+        <main>
+        <div class="container">
+            <form method="post" class="login-form" action="{% url 'login' %}">
+                {% csrf_token %}
+                <h2>Login</h2>
+                <div class="input-wrapper">
+                    <input type="text" placeholder="Username" name="username" />
+                </div>
+                <div class="input-wrapper">
+                    <input type="password" placeholder="Password" name="password" />
+                </div>
+                <div class="login-wrapper">
+                    <button type="submit" class="login-btn"><p>Log In</p></button>
+                </div>
+            </form>
+            {% if messages %}
+                <div class="login-alert">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </section>
+</body>
+</html>

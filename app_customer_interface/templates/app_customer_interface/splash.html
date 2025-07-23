@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading...</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #008080;
+            font-family: Arial, sans-serif;
+        }
+
+        #splash {
+            text-align: center;
+        }
+
+        #logo {
+            max-width: 130px;
+            height: auto;
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1.5s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div id="splash">
+        <img id="logo" src="/static/assets/images/scorder_logo_white.png" alt="Logo" onerror="this.onerror=null;this.src='/static/assets/images/no-image.png';" loading="lazy">
+    </div>
+
+    <script>
+        window.addEventListener('load', function() {
+            var redirectUrl = '';
+            setTimeout(function() {
+                window.location.href = "{% url 'index' encrypted_table_number=encrypted_table_number %}";
+            }, 3000);
+        });
+    </script>
+</body>
+</html>

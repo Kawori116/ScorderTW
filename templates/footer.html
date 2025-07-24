@@ -1,7 +1,7 @@
 <footer>
     <div class="container">
         <div class="footer-content">
-            Designed by Juliana
+            © <span id="current-year"></span>Scorder. All rights reserved.
         </div>
     </div>
 </footer>
@@ -15,6 +15,8 @@
 
 <script>
     $(document).ready(function() {
+        $('#current-year').text(new Date().getFullYear());
+        
         $(document).ajaxStart(function() {
             $('.loading-overlay').fadeIn(200);
         });

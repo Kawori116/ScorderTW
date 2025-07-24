@@ -83,25 +83,25 @@
     {%include 'footer.html'%}
 
     <script>
-        
+        // Helper function to convert UTC timestamp to Taipei time
+        function convertToTaipeiTime(utcTimestamp) {
+            var date = new Date(utcTimestamp + ':00Z');
+            return date.toLocaleString('en-US', { 
+                timeZone: 'Asia/Taipei',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            }).replace(/(\d+)\/(\d+)\/(\d+), (\d+):(\d+)/, '$3-$1-$2 $4:$5');
+        }
 
         $(document).ready(function() {
             $('.order-timestamp').each(function() {
                 var originalTime = $(this).data('timestamp');
-                
-                var date = new Date(originalTime + ':00Z');
-                
-                var cambodiaTime = date.toLocaleString('en-US', { 
-                    timeZone: 'Asia/Phnom_Penh',
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                }).replace(/(\d+)\/(\d+)\/(\d+), (\d+):(\d+)/, '$3-$1-$2 $4:$5');
-                
-                $(this).text(cambodiaTime);
+                var taipeiTime = convertToTaipeiTime(originalTime);
+                $(this).text(taipeiTime);
             });
 
             $('#incoming-orders-table').DataTable({
@@ -198,12 +198,15 @@
 
                     const dataTable = $('#incoming-orders-table').DataTable();
 
+                    // Convert UTC order time to Taipei timezone
+                    const taipeiOrderTime = convertToTaipeiTime(order_time);
+
                     const newRowData = [
                         order_number,
                         table_number !== 0 ? table_number : order_type_display ,
                         '<ul class="dish-list">' + dishList + '</ul>',
                         `<p class="order-status status-${order_status.toLowerCase()}">Placed</p>`,
-                        order_time,
+                        taipeiOrderTime,
                         `<div class="btn-action-wrap"><a href="/app_staff/order/${order_id}" class="view-order">View</a></div>`
                     ];
                     dataTable.row.add(newRowData).draw();

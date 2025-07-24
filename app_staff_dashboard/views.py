@@ -6,6 +6,7 @@ from app_owner_admin_panel.models import Dish, SystemConfiguration, ClientProfil
 from app_customer_interface.models import Order, OrderItem
 from django.http import JsonResponse
 import json
+import pytz
 from django.views.decorators.csrf import csrf_exempt
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -238,6 +239,7 @@ def confirm_order_view(request):
                 item.status = 'confirmed'
                 item.save()
 
+            # Send UTC timestamp (JavaScript will handle timezone conversion)
             formatted_timestamp = order.timestamp.strftime('%Y-%m-%d %H:%M')
 
             order_details = {

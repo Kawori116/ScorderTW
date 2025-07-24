@@ -95,7 +95,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-TIME_ZONE = 'Asia/Phnom_Penh'
+TIME_ZONE = 'Asia/Taipei'
 USE_TZ = True
 USE_I18N = True
 
@@ -185,11 +185,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
+# LANGUAGE_CODE = 'en-us'
 # TIME_ZONE = 'Asia/Taipei'
 # TIME_ZONE = 'UTC'
-# USE_TZ = True
 # TIME_ZONE = 'Asia/Phnom_Penh' //Cambodia
 # USE_L10N = True
 # USE_I18N = True

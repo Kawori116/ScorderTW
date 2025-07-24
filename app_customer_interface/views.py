@@ -9,6 +9,7 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 from datetime import datetime
 import json
+import pytz
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from decimal import Decimal
@@ -560,7 +561,12 @@ def place_order_view(request, table_number=0):
             
             # Convert the JSON string back to a Python list of dictionaries
             cart_items = json.loads(cart_items)
-            timestamp = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M')
+            
+            # Parse timestamp as Taipei timezone and convert to UTC
+            taipei_tz = pytz.timezone('Asia/Taipei')
+            naive_timestamp = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M')
+            taipei_timestamp = taipei_tz.localize(naive_timestamp)
+            timestamp = taipei_timestamp.astimezone(pytz.UTC)
 
             # print("table number wrong")
             # Perform any necessary server-side validation on the order data
@@ -716,6 +722,7 @@ def send_realtime_notification(order):
         }
         order_items_data.append(dish_data)
 
+    # Send UTC timestamp (JavaScript will handle timezone conversion)
     formatted_timestamp = order.timestamp.strftime('%Y-%m-%d %H:%M')
     
     notification_data = {

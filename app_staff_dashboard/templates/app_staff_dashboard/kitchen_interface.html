@@ -103,10 +103,10 @@
             });
         };
 
-        function toCambodiaTime(utcTimestamp) {
+        function toTaipeiTime(utcTimestamp) {
             const date = new Date(utcTimestamp + ':00Z');
             return date.toLocaleString('en-US', {
-                timeZone: 'Asia/Phnom_Penh',
+                timeZone: 'Asia/Taipei',
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
@@ -122,13 +122,13 @@
             $('.order-timestamp').each(function() {
                 const originalTime = $(this).data('timestamp');
                 
-                const formatteCambodiaTime = toCambodiaTime(originalTime);
-                $(this).text(formatteCambodiaTime);
+                const formattedTaipeiTime = toTaipeiTime(originalTime);
+                $(this).text(formattedTaipeiTime);
 
                 const now = new Date();
-                const cambodiaNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Phnom_Penh' }));
-                const cambodiaDateTime = new Date(toCambodiaTime(originalTime));
-                const diffMs = cambodiaNow - cambodiaDateTime;
+                const taipeiNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Taipei' }));
+                const taipeiDateTime = new Date(toTaipeiTime(originalTime));
+                const diffMs = taipeiNow - taipeiDateTime;
                 const diffMinutes = Math.floor(diffMs / 60000);
 
                 const orderItem = $(this).closest('tr')
@@ -283,8 +283,8 @@
                         const dishStatus = dish.status;
 
                         let date = new Date(orderDetails.order_time + ':00Z');
-                        const cambodiaTime = date.toLocaleString('en-US', { 
-                            timeZone: 'Asia/Phnom_Penh',
+                        const taipeiTime = date.toLocaleString('en-US', { 
+                            timeZone: 'Asia/Taipei',
                             year: 'numeric',
                             month: '2-digit',
                             day: '2-digit',
@@ -328,7 +328,7 @@
                                         ${dishStatus}
                                     </div>
                                 `,
-                                `${cambodiaTime}`,
+                                `${taipeiTime}`,
                                 ` 
                                     <div>
                                     <div class="btn-wrap mb-3">

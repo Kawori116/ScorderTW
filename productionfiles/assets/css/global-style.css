@@ -25,11 +25,18 @@ body,
 html {
     width: 100%;
     margin: 0;
-    min-height: 100%;
+    height: 100%;
 }
 
 body {
     background-color: var(--background-color);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Main content wrapper to push footer to bottom */
+body > section {
+    flex: 1;
 }
 
 h1 {
@@ -251,12 +258,12 @@ table td .btn-wrap button:hover {
     color: var(--accent);
 }
 
-/* Footer */
+/* Footer - positioned at bottom */
 footer {
     background-color: var(--accent);
     color: var(--white);
     padding: 2em;
-    margin-top: 3em;
+    margin-top: auto;
 }
 
 .footer-content {

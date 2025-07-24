@@ -31,7 +31,11 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 /static/
-/media/
+# Media files - keep folder structure but ignore actual files
+/media/dish_images/16x9/*
+/media/dish_images/1x1/*
+!/media/dish_images/16x9/.gitkeep
+!/media/dish_images/1x1/.gitkeep
 
 # IDE
 .vscode/
